@@ -1,0 +1,10 @@
+services:
+  deal-db:
+    image: 'postgres:latest'
+    container_name: 'deal-db'
+    ports:
+      - '5433:5432'
+    environment:
+      - POSTGRES_USER=deal
+      - POSTGRES_PASSWORD=deal
+      - POSTGRES_DB=deal
