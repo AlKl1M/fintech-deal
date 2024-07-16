@@ -1,5 +1,14 @@
 application-version: 0.0.1-SNAPSHOT
 application-description: Deal rest api
+
+server:
+  port: 8080
+
+
+services:
+  contractor:
+    uri: http://localhost:8081
+
 spring:
   jpa:
     hibernate:

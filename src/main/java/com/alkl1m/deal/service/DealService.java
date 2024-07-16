@@ -5,6 +5,7 @@ import com.alkl1m.deal.web.payload.ChangeStatusPayload;
 import com.alkl1m.deal.web.payload.ContractorDto;
 import com.alkl1m.deal.web.payload.DealDto;
 import com.alkl1m.deal.web.payload.DealFiltersPayload;
+import com.alkl1m.deal.web.payload.MainBorrowerMessage;
 import com.alkl1m.deal.web.payload.NewDealPayload;
 
 import java.util.List;
@@ -18,7 +19,7 @@ public interface DealService {
 
     DealDto saveOrUpdate(NewDealPayload payload);
 
-    DealDto changeStatus(ChangeStatusPayload payload);
+    MainBorrowerMessage changeStatus(ChangeStatusPayload payload);
 
 
 }

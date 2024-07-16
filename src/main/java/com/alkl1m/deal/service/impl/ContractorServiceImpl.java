@@ -4,9 +4,11 @@ import com.alkl1m.deal.domain.entity.Contractor;
 import com.alkl1m.deal.domain.entity.Role;
 import com.alkl1m.deal.domain.exception.ContractorNotFoundException;
 import com.alkl1m.deal.repository.ContractorRepository;
+import com.alkl1m.deal.repository.DealRepository;
 import com.alkl1m.deal.repository.RoleRepository;
 import com.alkl1m.deal.service.ContractorService;
 import com.alkl1m.deal.web.payload.ContractorDto;
+import com.alkl1m.deal.web.payload.MainBorrowerMessage;
 import com.alkl1m.deal.web.payload.NewContractorPayload;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ContractorServiceImpl implements ContractorService {
 
+    private final DealRepository dealRepository;
     private final ContractorRepository contractorRepository;
     private final RoleRepository roleRepository;
     private static final String DEFAULT_USER_ID = "1";
@@ -47,14 +50,15 @@ public class ContractorServiceImpl implements ContractorService {
 
     @Override
     @Transactional
-    public void deleteContractorById(UUID id) {
+    public MainBorrowerMessage deleteContractorById(UUID id) {
         Optional<Contractor> optionalContractor = contractorRepository.findById(id);
-        optionalContractor.ifPresentOrElse(contractor -> {
-            contractor.setActive(false);
-            contractorRepository.save(contractor);
-        }, () -> {
-            throw new ContractorNotFoundException(String.format("Contractor with id %s not found", id));
-        });
+        if (optionalContractor.isPresent()) {
+            boolean canDelete = dealRepository.checkIfDealExists(optionalContractor.get().getId()) <= 1;
+            optionalContractor.get().setActive(!canDelete);
+            contractorRepository.save(optionalContractor.get());
+            return new MainBorrowerMessage(optionalContractor.get().getContractorId(), canDelete);
+        }
+        return new MainBorrowerMessage(null, false);
     }
 
     @Override
