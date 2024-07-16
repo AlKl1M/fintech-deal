@@ -1,0 +1,19 @@
+application-version: 0.0.1-SNAPSHOT
+application-description: Deal rest api
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+  datasource:
+    url: jdbc:postgresql://localhost:5433/deal?currentSchema=deal
+    username: deal
+    password: deal
+    driver-class-name: org.postgresql.Driver
+  sql:
+    init:
+      mode: always
+      continue-on-error: false
+  liquibase:
+    change-log: classpath:liquibase/db.changelog.yaml
+    enabled: true
+    default-schema: deal
