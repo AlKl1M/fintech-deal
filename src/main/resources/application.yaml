@@ -26,3 +26,27 @@ spring:
     change-log: classpath:liquibase/db.changelog.yaml
     enabled: true
     default-schema: deal
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: never
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceId: AUTO
+          jobStore:
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+            useProperties: false
+            tablePrefix: qrtz_
+            clusterCheckinInterval: 5000
+            isClustered: true
+          threadPool:
+            class: org.quartz.simpl.SimpleThreadPool
+            threadCount: 10
+            threadsInheritContextClassLoaderOfInitializingThread: true
+    auto-startup: false
+
+scheduler:
+  permanent-jobs-group-name: PERMANENT
+  show-time-job-cron: ${SHOW_TIME_JOB_CRON:*/5 * * * * ?}

@@ -11,11 +11,11 @@ public class WebClientContractorClient implements ContractorClient {
 
 
     @Override
-    public ResponseEntity mainBorrower(String contractorId, Boolean main) {
+    public ResponseEntity<Void> mainBorrower(String contractorId, Boolean main) {
         return this.restClient
                 .patch()
                 .uri("/contractor/main-borrower?contractorId={contractorId}&main={main}", contractorId, main)
                 .retrieve()
-                .body(ResponseEntity.class);
+                .toBodilessEntity();
     }
 }

@@ -62,7 +62,6 @@ public class ContractorServiceImpl implements ContractorService {
                 optionalContractor.get().setActive(false);
                 outboxService.save(optionalContractor.get());
                 contractorRepository.save(optionalContractor.get());
-                outboxService.publishNextBatchToEventBus();
                 return;
             }
             optionalContractor.get().setActive(false);

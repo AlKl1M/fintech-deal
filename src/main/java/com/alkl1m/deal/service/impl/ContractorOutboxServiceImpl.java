@@ -39,8 +39,8 @@ public class ContractorOutboxServiceImpl implements ContractorOutboxService {
     public void publishNextBatchToEventBus() {
         List<ContractorOutbox> batch = outboxRepository.findByStatus(ContractorOutboxStatus.CREATED);
         batch.forEach(contractorOutbox -> {
-            ResponseEntity<Void> voidResponseEntity = eventBusService.publishContractor(contractorOutbox);
-            if (voidResponseEntity.getStatusCode().is2xxSuccessful()) {
+            ResponseEntity<Void> response = eventBusService.publishContractor(contractorOutbox);
+            if (response.getStatusCode().is2xxSuccessful()) {
                 contractorOutbox.setStatus(ContractorOutboxStatus.DONE);
             }
         });

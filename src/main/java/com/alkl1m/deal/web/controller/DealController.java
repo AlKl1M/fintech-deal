@@ -48,9 +48,8 @@ public class DealController {
     @AuditLog
     @PatchMapping("/change")
     public ResponseEntity<MainBorrowerMessage> findById(@RequestBody ChangeStatusPayload payload) {
-        MainBorrowerMessage message = dealService.changeStatus(payload);
-        client.mainBorrower(message.contractorId(), message.message());
-        return ResponseEntity.ok(message);
+        //TODO
+        return ResponseEntity.ok().build();
     }
 
     @AuditLog
