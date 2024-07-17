@@ -1,5 +1,6 @@
 package com.alkl1m.deal.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -24,6 +25,7 @@ public class Type {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @JsonIgnore
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
 

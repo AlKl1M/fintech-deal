@@ -12,10 +12,12 @@ import java.util.UUID;
 @Repository
 public interface DealRepository extends JpaRepository<Deal, UUID>, JpaSpecificationExecutor<Deal> {
 
-    @Query(value = "SELECT COUNT(*) FROM deal.deal_contractor dc\n" +
-            "INNER JOIN deal.deal d ON dc.deal_id = d.id\n" +
-            "INNER JOIN deal.deal_status ds ON d.deal_status = ds.id\n" +
-            "WHERE dc.id = :dealContractorId AND d.deal_status = 'ACTIVE'", nativeQuery = true)
-    int checkIfDealExists(@Param("dealContractorId") UUID dealContractorId);
+    @Query(value = """
+            SELECT COUNT(*) FROM deal.deal_contractor dc
+                        INNER JOIN deal.deal d ON dc.deal_id = d.id
+                        INNER JOIN deal.deal_status ds ON d.deal_status = ds.id
+                        WHERE dc.contractor_id = :contractorId AND d.deal_status = 'ACTIVE' AND dc.is_active = true
+            """, nativeQuery = true)
+    int checkIfDealExists(@Param("contractorId") String contractorId);
 
 }

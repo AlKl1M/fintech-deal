@@ -4,11 +4,6 @@ import com.alkl1m.deal.domain.entity.Contractor;
 import com.alkl1m.deal.domain.entity.Deal;
 import com.alkl1m.deal.domain.entity.Status;
 import com.alkl1m.deal.domain.entity.Type;
-import com.alkl1m.deal.domain.exception.ContractorNotFoundException;
-import com.alkl1m.deal.domain.exception.DealNotFoundException;
-import com.alkl1m.deal.domain.exception.StatusNotFoundException;
-import com.alkl1m.deal.domain.exception.TypeNotFoundException;
-import com.alkl1m.deal.repository.ContractorRepository;
 import com.alkl1m.deal.repository.DealRepository;
 import com.alkl1m.deal.repository.StatusRepository;
 import com.alkl1m.deal.repository.TypeRepository;
@@ -20,6 +15,7 @@ import com.alkl1m.deal.web.payload.DealDto;
 import com.alkl1m.deal.web.payload.DealFiltersPayload;
 import com.alkl1m.deal.web.payload.MainBorrowerMessage;
 import com.alkl1m.deal.web.payload.NewDealPayload;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -27,8 +23,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -36,29 +35,37 @@ import java.util.UUID;
 public class DealServiceImpl implements DealService {
 
     private final DealRepository dealRepository;
-    private final ContractorRepository contractorRepository;
     private final TypeRepository typeRepository;
     private final StatusRepository statusRepository;
     private static final String DEFAULT_USER_ID = "1";
 
 
     @Override
-    public List<Deal> getDealsByParameters(DealFiltersPayload payload) {
+    public List<DealDto> getDealsByParameters(DealFiltersPayload payload) {
         Specification<Deal> spec = DealSpecifications.getDealByParameters(payload);
+        List<Deal> deals = dealRepository.findAll(spec);
 
-        List<Deal> dealsPage = dealRepository.findAll(spec);
-
-        return dealsPage;
+        return deals.stream()
+                .map(deal -> {
+                    Set<ContractorDto> contractors = deal.getContractors().stream()
+                            .map(ContractorDto::from)
+                            .collect(Collectors.toSet());
+                    return DealDto.from(deal, contractors);
+                })
+                .toList();
     }
 
     @Override
     public DealDto findById(UUID id) {
-        Deal deal = dealRepository.findById(id).orElseThrow(() -> new ContractorNotFoundException("Contractor not found exception"));
-        List<Contractor> contractors = contractorRepository.findActiveContractorsByDealIdAndIsActiveIsTrue(id);
-        List<ContractorDto> contractorDtos = new ArrayList<>();
-        for (Contractor contractor : contractors) {
-            contractorDtos.add(ContractorDto.from(contractor));
-        }
+        Deal deal = dealRepository.findById(id).orElseThrow(
+                () -> new EntityNotFoundException(String.format("Contractor with id %s not found!", id.toString()))
+        );
+
+        Set<ContractorDto> contractorDtos = deal.getContractors()
+                .stream()
+                .map(ContractorDto::from)
+                .collect(Collectors.toSet());
+
         return DealDto.from(deal, contractorDtos);
     }
 
@@ -70,30 +77,38 @@ public class DealServiceImpl implements DealService {
             Deal existingDeal = dealRepository.findById(payload.id()).orElse(null);
             if (existingDeal != null) {
                 deal = updateExistingDeal(payload, existingDeal);
+                Set<ContractorDto> contractorDtos = deal.getContractors()
+                        .stream()
+                        .map(ContractorDto::from)
+                        .collect(Collectors.toSet());
+                return DealDto.from(deal, contractorDtos);
             }
-        } else {
-            deal = createNewDeal(payload);
         }
-        return DealDto.from(deal, new ArrayList<>());
+        deal = createNewDeal(payload);
+        return DealDto.from(deal, new HashSet<>());
     }
 
     @Override
     @Transactional
     public MainBorrowerMessage changeStatus(ChangeStatusPayload payload) {
-        Deal deal = dealRepository.findById(payload.dealId()).orElseThrow(() -> new DealNotFoundException("Deal not found"));
-        Status status = statusRepository.findById(payload.statusId()).orElseThrow(() -> new StatusNotFoundException("Status not found"));
+        Deal deal = dealRepository.findById(payload.dealId()).orElseThrow(() -> new EntityNotFoundException("Deal not found"));
+        Status status = statusRepository.findById(payload.statusId()).orElseThrow(() -> new EntityNotFoundException("Status not found"));
         Contractor mainContractor = deal.getContractors().stream()
                 .filter(Contractor::isMain)
                 .findFirst()
                 .orElse(null);
         if (deal.getStatus().getId().equals("DRAFT") && status.getId().equals("ACTIVE")) {
-            if(!(dealRepository.checkIfDealExists(mainContractor.getId()) > 1)) {
+            if(!(dealRepository.checkIfDealExists(mainContractor.getContractorId()) >= 1)) {
+                deal.setStatus(status);
+                dealRepository.save(deal);
                 return new MainBorrowerMessage(mainContractor.getContractorId(), true);
             }
         }
 
         if (deal.getStatus().getId().equals("ACTIVE") && status.getId().equals("CLOSED")) {
-            if(!(dealRepository.checkIfDealExists(mainContractor.getId()) > 1)) {
+            if(!(dealRepository.checkIfDealExists(mainContractor.getContractorId()) > 1)) {
+                deal.setStatus(status);
+                dealRepository.save(deal);
                 return new MainBorrowerMessage(mainContractor.getContractorId(), false);
             }
         }
@@ -103,8 +118,12 @@ public class DealServiceImpl implements DealService {
     }
 
     private Deal createNewDeal(NewDealPayload payload) {
-        Type type = typeRepository.findById(payload.typeId()).orElseThrow(() -> new TypeNotFoundException("Type not found"));
-        Status status = statusRepository.findById("DRAFT").orElseThrow(() -> new StatusNotFoundException("Status not found"));
+        Type type = typeRepository.findById(payload.typeId()).orElseThrow(
+                () -> new EntityNotFoundException("Type not found")
+        );
+        Status status = statusRepository.findById("DRAFT").orElseThrow(
+                () -> new EntityNotFoundException("Status not found")
+        );
         Deal deal = NewDealPayload.toDeal(payload, type, status, DEFAULT_USER_ID);
         deal.setId(UUID.randomUUID());
 
@@ -112,7 +131,9 @@ public class DealServiceImpl implements DealService {
     }
 
     private Deal updateExistingDeal(NewDealPayload payload, Deal existingDeal) {
-        Type type = typeRepository.findById(payload.typeId()).orElseThrow(() -> new TypeNotFoundException("Type not found"));
+        Type type = typeRepository.findById(payload.typeId()).orElseThrow(
+                () -> new EntityNotFoundException("Type not found")
+        );
 
         existingDeal.setDescription(payload.description());
         existingDeal.setAgreementNumber(payload.agreementNumber());
@@ -126,4 +147,5 @@ public class DealServiceImpl implements DealService {
         existingDeal.setModifyUserId(DEFAULT_USER_ID);
         return dealRepository.save(existingDeal);
     }
+
 }

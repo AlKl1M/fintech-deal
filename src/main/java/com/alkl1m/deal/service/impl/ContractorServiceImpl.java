@@ -2,7 +2,6 @@ package com.alkl1m.deal.service.impl;
 
 import com.alkl1m.deal.domain.entity.Contractor;
 import com.alkl1m.deal.domain.entity.Role;
-import com.alkl1m.deal.domain.exception.ContractorNotFoundException;
 import com.alkl1m.deal.repository.ContractorRepository;
 import com.alkl1m.deal.repository.DealRepository;
 import com.alkl1m.deal.repository.RoleRepository;
@@ -16,10 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -36,6 +32,9 @@ public class ContractorServiceImpl implements ContractorService {
     @Transactional
     public ContractorDto saveOrUpdate(NewContractorPayload payload) {
         Contractor contractor = new Contractor();
+        if (payload.main() && contractorRepository.existsByDealIdAndMainTrue(payload.dealId())) {
+            throw new IllegalStateException("You can't create more than one main contractor for each deal");
+        }
         if (payload.id() != null && contractorRepository.existsById(payload.id())) {
             Contractor existingContractor = contractorRepository.findById(payload.id()).orElse(null);
             if (existingContractor != null) {
@@ -53,7 +52,7 @@ public class ContractorServiceImpl implements ContractorService {
     public MainBorrowerMessage deleteContractorById(UUID id) {
         Optional<Contractor> optionalContractor = contractorRepository.findById(id);
         if (optionalContractor.isPresent()) {
-            boolean canDelete = dealRepository.checkIfDealExists(optionalContractor.get().getId()) <= 1;
+            boolean canDelete = dealRepository.checkIfDealExists(optionalContractor.get().getContractorId()) <= 1;
             optionalContractor.get().setActive(!canDelete);
             contractorRepository.save(optionalContractor.get());
             return new MainBorrowerMessage(optionalContractor.get().getContractorId(), canDelete);
@@ -64,8 +63,12 @@ public class ContractorServiceImpl implements ContractorService {
     @Override
     @Transactional
     public void addRoleToContractor(UUID contractorId, String roleId) {
-        Contractor contractor = contractorRepository.findById(contractorId).orElseThrow(() -> new EntityNotFoundException("Contractor not found"));
-        Role role = roleRepository.findById(roleId).orElseThrow(() -> new EntityNotFoundException("Role not found"));
+        Contractor contractor = contractorRepository.findById(contractorId).orElseThrow(
+                () -> new EntityNotFoundException("Contractor not found")
+        );
+        Role role = roleRepository.findById(roleId).orElseThrow(
+                () -> new EntityNotFoundException("Role not found")
+        );
 
         contractor.getRoles().add(role);
         contractorRepository.save(contractor);

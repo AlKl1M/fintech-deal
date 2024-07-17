@@ -5,6 +5,7 @@ import com.alkl1m.deal.service.ContractorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,16 +21,16 @@ public class ContractorToRoleController {
     private final ContractorService contractorService;
 
     @AuditLog
-    @PostMapping("/add")
-    public ResponseEntity<Void> saveOrUpdateContractor(@RequestParam UUID contractorId, @RequestParam String roleId) {
-        contractorService.addRoleToContractor(contractorId, roleId);
+    @PostMapping("/add/{id}")
+    public ResponseEntity<Void> saveOrUpdateContractor(@PathVariable UUID id, @RequestParam String roleId) {
+        contractorService.addRoleToContractor(id, roleId);
         return ResponseEntity.ok().build();
     }
 
     @AuditLog
-    @DeleteMapping("/delete")
-    public ResponseEntity<Void> deleteRoleForContractor(@RequestParam UUID contractorId, @RequestParam String roleId) {
-        contractorService.deactivateRoleForContractor(contractorId, roleId);
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deleteRoleForContractor(@PathVariable UUID id, @RequestParam String roleId) {
+        contractorService.deactivateRoleForContractor(id, roleId);
         return ResponseEntity.ok().build();
     }
 
