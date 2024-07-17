@@ -24,7 +24,6 @@ import java.util.UUID;
 public class ContractorController {
 
     private final ContractorService contractorService;
-    private final ContractorClient client;
 
     @AuditLog
     @PutMapping("/save")
@@ -35,8 +34,7 @@ public class ContractorController {
     @AuditLog
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteContractor(@PathVariable UUID id) {
-        MainBorrowerMessage message = contractorService.deleteContractorById(id);
-        client.mainBorrower(message.contractorId(), message.message());
+        contractorService.deleteContractorById(id);
         return ResponseEntity.ok().build();
     }
 

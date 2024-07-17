@@ -1,0 +1,40 @@
+databaseChangeLog:
+  - changeSet:
+      id: 8
+      author: alkl1m
+      changes:
+        - createTable:
+            tableName: contractor_outbox
+            ifNotExists: true
+            columns:
+              - column:
+                  name: id
+                  type: serial
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: created_date
+                  type: timestamp
+                  constraints:
+                    nullable: false
+              - column:
+                  name: payload
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: idempotent_key
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: contractor_id
+                  type: text
+                  constraints:
+                    nullable: false

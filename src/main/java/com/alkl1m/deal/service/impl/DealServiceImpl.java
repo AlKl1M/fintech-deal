@@ -8,6 +8,7 @@ import com.alkl1m.deal.repository.DealRepository;
 import com.alkl1m.deal.repository.StatusRepository;
 import com.alkl1m.deal.repository.TypeRepository;
 import com.alkl1m.deal.repository.spec.DealSpecifications;
+import com.alkl1m.deal.service.ContractorOutboxService;
 import com.alkl1m.deal.service.DealService;
 import com.alkl1m.deal.web.payload.ChangeStatusPayload;
 import com.alkl1m.deal.web.payload.ContractorDto;
@@ -21,7 +22,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -36,6 +36,7 @@ public class DealServiceImpl implements DealService {
 
     private final DealRepository dealRepository;
     private final TypeRepository typeRepository;
+    private final ContractorOutboxService outboxService;
     private final StatusRepository statusRepository;
     private static final String DEFAULT_USER_ID = "1";
 
@@ -90,31 +91,37 @@ public class DealServiceImpl implements DealService {
 
     @Override
     @Transactional
-    public MainBorrowerMessage changeStatus(ChangeStatusPayload payload) {
+    public void changeStatus(ChangeStatusPayload payload) {
         Deal deal = dealRepository.findById(payload.dealId()).orElseThrow(() -> new EntityNotFoundException("Deal not found"));
         Status status = statusRepository.findById(payload.statusId()).orElseThrow(() -> new EntityNotFoundException("Status not found"));
+
         Contractor mainContractor = deal.getContractors().stream()
                 .filter(Contractor::isMain)
                 .findFirst()
                 .orElse(null);
-        if (deal.getStatus().getId().equals("DRAFT") && status.getId().equals("ACTIVE")) {
-            if(!(dealRepository.checkIfDealExists(mainContractor.getContractorId()) >= 1)) {
+
+        if (mainContractor != null) {
+            if (deal.getStatus().getId().equals("DRAFT") && status.getId().equals("ACTIVE") &&
+                    dealRepository.checkIfDealExists(mainContractor.getContractorId()) <= 1) {
                 deal.setStatus(status);
                 dealRepository.save(deal);
-                return new MainBorrowerMessage(mainContractor.getContractorId(), true);
+                outboxService.save(mainContractor);
+                outboxService.publishNextBatchToEventBus();
+                return;
+            }
+
+            if (deal.getStatus().getId().equals("ACTIVE") && status.getId().equals("CLOSED") &&
+                    dealRepository.checkIfDealExists(mainContractor.getContractorId()) <= 1) {
+                deal.setStatus(status);
+                dealRepository.save(deal);
+                outboxService.save(mainContractor);
+                outboxService.publishNextBatchToEventBus();
+                return;
             }
         }
 
-        if (deal.getStatus().getId().equals("ACTIVE") && status.getId().equals("CLOSED")) {
-            if(!(dealRepository.checkIfDealExists(mainContractor.getContractorId()) > 1)) {
-                deal.setStatus(status);
-                dealRepository.save(deal);
-                return new MainBorrowerMessage(mainContractor.getContractorId(), false);
-            }
-        }
         deal.setStatus(status);
         dealRepository.save(deal);
-        return new MainBorrowerMessage(null, false);
     }
 
     private Deal createNewDeal(NewDealPayload payload) {

@@ -18,7 +18,7 @@ public interface DealService {
 
     DealDto saveOrUpdate(NewDealPayload payload);
 
-    MainBorrowerMessage changeStatus(ChangeStatusPayload payload);
+    void changeStatus(ChangeStatusPayload payload);
 
 
 }

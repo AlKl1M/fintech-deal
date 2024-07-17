@@ -1,11 +1,15 @@
 package com.alkl1m.deal.service.impl;
 
 import com.alkl1m.deal.domain.entity.Contractor;
+import com.alkl1m.deal.domain.entity.ContractorOutbox;
 import com.alkl1m.deal.domain.entity.Role;
+import com.alkl1m.deal.domain.enums.ContractorOutboxStatus;
 import com.alkl1m.deal.repository.ContractorRepository;
 import com.alkl1m.deal.repository.DealRepository;
 import com.alkl1m.deal.repository.RoleRepository;
+import com.alkl1m.deal.service.ContractorOutboxService;
 import com.alkl1m.deal.service.ContractorService;
+import com.alkl1m.deal.service.EventBusService;
 import com.alkl1m.deal.web.payload.ContractorDto;
 import com.alkl1m.deal.web.payload.MainBorrowerMessage;
 import com.alkl1m.deal.web.payload.NewContractorPayload;
@@ -26,6 +30,7 @@ public class ContractorServiceImpl implements ContractorService {
     private final DealRepository dealRepository;
     private final ContractorRepository contractorRepository;
     private final RoleRepository roleRepository;
+    private final ContractorOutboxService outboxService;
     private static final String DEFAULT_USER_ID = "1";
 
     @Override
@@ -49,15 +54,20 @@ public class ContractorServiceImpl implements ContractorService {
 
     @Override
     @Transactional
-    public MainBorrowerMessage deleteContractorById(UUID id) {
+    public void deleteContractorById(UUID id) {
         Optional<Contractor> optionalContractor = contractorRepository.findById(id);
         if (optionalContractor.isPresent()) {
             boolean canDelete = dealRepository.checkIfDealExists(optionalContractor.get().getContractorId()) <= 1;
-            optionalContractor.get().setActive(!canDelete);
+            if (canDelete) {
+                optionalContractor.get().setActive(false);
+                outboxService.save(optionalContractor.get());
+                contractorRepository.save(optionalContractor.get());
+                outboxService.publishNextBatchToEventBus();
+                return;
+            }
+            optionalContractor.get().setActive(false);
             contractorRepository.save(optionalContractor.get());
-            return new MainBorrowerMessage(optionalContractor.get().getContractorId(), canDelete);
         }
-        return new MainBorrowerMessage(null, false);
     }
 
     @Override

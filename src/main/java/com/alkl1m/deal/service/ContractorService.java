@@ -10,7 +10,7 @@ public interface ContractorService {
 
     ContractorDto saveOrUpdate(NewContractorPayload payload);
 
-    MainBorrowerMessage deleteContractorById(UUID id);
+    void deleteContractorById(UUID id);
 
     void addRoleToContractor(UUID contractorId, String roleId);
 
