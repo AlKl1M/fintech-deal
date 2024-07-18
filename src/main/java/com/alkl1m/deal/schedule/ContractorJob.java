@@ -17,6 +17,6 @@ public class ContractorJob extends QuartzJobBean {
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
-        outboxService.publishNextBatchToEventBus();
+        outboxService.publishNextBatchToEventBus(10);
     }
 }

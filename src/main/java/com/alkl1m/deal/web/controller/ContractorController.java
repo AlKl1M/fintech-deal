@@ -1,10 +1,8 @@
 package com.alkl1m.deal.web.controller;
 
 import com.alkl1m.auditlogspringbootautoconfigure.annotation.AuditLog;
-import com.alkl1m.deal.client.ContractorClient;
 import com.alkl1m.deal.service.ContractorService;
 import com.alkl1m.deal.web.payload.ContractorDto;
-import com.alkl1m.deal.web.payload.MainBorrowerMessage;
 import com.alkl1m.deal.web.payload.NewContractorPayload;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

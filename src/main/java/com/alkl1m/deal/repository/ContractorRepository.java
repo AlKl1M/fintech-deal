@@ -13,7 +13,7 @@ import java.util.UUID;
 public interface ContractorRepository extends JpaRepository<Contractor, UUID> {
 
     @Modifying
-    @Query(value = "UPDATE deal.contractor_to_role SET is_active = false WHERE deal_contractor = ?1 AND contractor_role = ?2", nativeQuery = true)
+    @Query(value = "UPDATE contractor_to_role SET is_active = false WHERE deal_contractor = ?1 AND contractor_role = ?2", nativeQuery = true)
     void deleteRoleFromContractor(UUID contractorId, String roleId);
 
     boolean existsByDealIdAndMainTrue(@Param("dealId") UUID dealId);

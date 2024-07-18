@@ -31,8 +31,8 @@ public class ContractorOutbox {
     @Column(name = "created_date")
     private Date createdDate;
 
-    @Column(name = "payload", length = 2000)
-    private String payload;
+    @Column(name = "main")
+    private boolean main;
 
     @Column(name = "idempotent_key", unique = true)
     private String idempotentKey;

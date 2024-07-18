@@ -1,5 +1,6 @@
 package com.alkl1m.deal.client;
 
+import com.alkl1m.deal.web.payload.MainBorrowerRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClient;
@@ -11,10 +12,11 @@ public class WebClientContractorClient implements ContractorClient {
 
 
     @Override
-    public ResponseEntity<Void> mainBorrower(String contractorId, Boolean main) {
+    public ResponseEntity<Void> mainBorrower(MainBorrowerRequest payload) {
         return this.restClient
                 .patch()
-                .uri("/contractor/main-borrower?contractorId={contractorId}&main={main}", contractorId, main)
+                .uri("/contractor/main-borrower")
+                .body(payload)
                 .retrieve()
                 .toBodilessEntity();
     }

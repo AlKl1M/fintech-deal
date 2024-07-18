@@ -24,7 +24,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(schema = "deal", name = "deal")
+@Table(name = "deal")
 public class Deal {
 
     @Id

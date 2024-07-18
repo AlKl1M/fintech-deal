@@ -2,12 +2,10 @@ package com.alkl1m.deal.web.controller;
 
 import com.alkl1m.auditlogspringbootautoconfigure.annotation.AuditLog;
 import com.alkl1m.deal.client.ContractorClient;
-import com.alkl1m.deal.domain.entity.Deal;
 import com.alkl1m.deal.service.DealService;
 import com.alkl1m.deal.web.payload.ChangeStatusPayload;
 import com.alkl1m.deal.web.payload.DealDto;
 import com.alkl1m.deal.web.payload.DealFiltersPayload;
-import com.alkl1m.deal.web.payload.MainBorrowerMessage;
 import com.alkl1m.deal.web.payload.NewDealPayload;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +27,6 @@ import java.util.UUID;
 public class DealController {
 
     private final DealService dealService;
-    private final ContractorClient client;
 
     @AuditLog
     @PostMapping("/save")
@@ -47,8 +44,8 @@ public class DealController {
 
     @AuditLog
     @PatchMapping("/change")
-    public ResponseEntity<MainBorrowerMessage> findById(@RequestBody ChangeStatusPayload payload) {
-        //TODO
+    public ResponseEntity<Void> changeStatus(@RequestBody ChangeStatusPayload payload) {
+        dealService.changeStatus(payload);
         return ResponseEntity.ok().build();
     }
 

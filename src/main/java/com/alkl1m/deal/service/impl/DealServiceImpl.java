@@ -1,9 +1,11 @@
 package com.alkl1m.deal.service.impl;
 
 import com.alkl1m.deal.domain.entity.Contractor;
+import com.alkl1m.deal.domain.entity.ContractorOutbox;
 import com.alkl1m.deal.domain.entity.Deal;
 import com.alkl1m.deal.domain.entity.Status;
 import com.alkl1m.deal.domain.entity.Type;
+import com.alkl1m.deal.domain.enums.ContractorOutboxStatus;
 import com.alkl1m.deal.repository.DealRepository;
 import com.alkl1m.deal.repository.StatusRepository;
 import com.alkl1m.deal.repository.TypeRepository;
@@ -14,7 +16,6 @@ import com.alkl1m.deal.web.payload.ChangeStatusPayload;
 import com.alkl1m.deal.web.payload.ContractorDto;
 import com.alkl1m.deal.web.payload.DealDto;
 import com.alkl1m.deal.web.payload.DealFiltersPayload;
-import com.alkl1m.deal.web.payload.MainBorrowerMessage;
 import com.alkl1m.deal.web.payload.NewDealPayload;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -103,25 +104,35 @@ public class DealServiceImpl implements DealService {
         if (mainContractor != null) {
             if (deal.getStatus().getId().equals("DRAFT") && status.getId().equals("ACTIVE") &&
                     dealRepository.checkIfDealExists(mainContractor.getContractorId()) <= 1) {
-                deal.setStatus(status);
-                dealRepository.save(deal);
-                outboxService.save(mainContractor);
-                outboxService.publishNextBatchToEventBus();
+                processDealStatusChange(deal, status, true, mainContractor.getContractorId());
                 return;
             }
 
             if (deal.getStatus().getId().equals("ACTIVE") && status.getId().equals("CLOSED") &&
                     dealRepository.checkIfDealExists(mainContractor.getContractorId()) <= 1) {
-                deal.setStatus(status);
-                dealRepository.save(deal);
-                outboxService.save(mainContractor);
-                outboxService.publishNextBatchToEventBus();
+                processDealStatusChange(deal, status, false, mainContractor.getContractorId());
                 return;
             }
         }
 
         deal.setStatus(status);
         dealRepository.save(deal);
+    }
+
+    private void processDealStatusChange(Deal deal, Status status, boolean isActiveToActive, String contractorId) {
+        deal.setStatus(status);
+        dealRepository.save(deal);
+        outboxService.save(createContractorOutbox(isActiveToActive, contractorId));
+    }
+
+    private ContractorOutbox createContractorOutbox(boolean isMain, String contractorId) {
+        return ContractorOutbox.builder()
+                .createdDate(new Date())
+                .main(isMain)
+                .idempotentKey(UUID.randomUUID().toString())
+                .status(ContractorOutboxStatus.CREATED)
+                .contractorId(contractorId)
+                .build();
     }
 
     private Deal createNewDeal(NewDealPayload payload) {

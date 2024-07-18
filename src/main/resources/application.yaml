@@ -14,7 +14,7 @@ spring:
     hibernate:
       ddl-auto: update
   datasource:
-    url: jdbc:postgresql://localhost:5433/deal?currentSchema=deal
+    url: jdbc:postgresql://localhost:5433/deal
     username: deal
     password: deal
     driver-class-name: org.postgresql.Driver
@@ -25,7 +25,6 @@ spring:
   liquibase:
     change-log: classpath:liquibase/db.changelog.yaml
     enabled: true
-    default-schema: deal
   quartz:
     job-store-type: jdbc
     jdbc:

@@ -1,7 +1,7 @@
 package com.alkl1m.deal.web.payload;
 
-public record MainBorrowerMessage(
+public record MainBorrowerRequest(
         String contractorId,
-        Boolean message
+        boolean main
 ) {
 }

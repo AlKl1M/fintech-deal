@@ -1,5 +1,7 @@
 package com.alkl1m.deal.config;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
@@ -17,6 +19,7 @@ import java.util.stream.Collectors;
 public class SchedulerConfig {
 
     private final SchedulerProperties schedulerProperties;
+    private final Logger logger = LogManager.getLogger(SchedulerConfig.class);
 
     public SchedulerConfig(SchedulerProperties schedulerProperties) {
         this.schedulerProperties = schedulerProperties;
@@ -41,7 +44,7 @@ public class SchedulerConfig {
                     scheduler.rescheduleJob(trigger.getKey(), trigger);
                 }
             } catch (SchedulerException e) {
-                // Handle exception
+                logger.error("Ошибка при перепланировании триггера");
             }
         });
     }
@@ -54,12 +57,12 @@ public class SchedulerConfig {
                     try {
                         scheduler.deleteJob(jobKey);
                     } catch (SchedulerException e) {
-                        // Handle exception
+                        logger.error("Ошибка при удалении задания", e);
                     }
                 }
             });
         } catch (SchedulerException e) {
-            // Handle exception
+            logger.error("Ошибка при получении ключей заданий", e);
         }
     }
 }

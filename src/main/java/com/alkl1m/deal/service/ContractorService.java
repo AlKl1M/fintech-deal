@@ -1,7 +1,6 @@
 package com.alkl1m.deal.service;
 
 import com.alkl1m.deal.web.payload.ContractorDto;
-import com.alkl1m.deal.web.payload.MainBorrowerMessage;
 import com.alkl1m.deal.web.payload.NewContractorPayload;
 
 import java.util.UUID;

@@ -19,8 +19,8 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: payload
-                  type: text
+                  name: main
+                  type: boolean
                   constraints:
                     nullable: false
               - column:

@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(schema = "deal", name = "deal_type")
+@Table(name = "deal_type")
 public class Type {
 
     @Id

@@ -9,9 +9,7 @@ import com.alkl1m.deal.repository.DealRepository;
 import com.alkl1m.deal.repository.RoleRepository;
 import com.alkl1m.deal.service.ContractorOutboxService;
 import com.alkl1m.deal.service.ContractorService;
-import com.alkl1m.deal.service.EventBusService;
 import com.alkl1m.deal.web.payload.ContractorDto;
-import com.alkl1m.deal.web.payload.MainBorrowerMessage;
 import com.alkl1m.deal.web.payload.NewContractorPayload;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -56,14 +54,24 @@ public class ContractorServiceImpl implements ContractorService {
     @Transactional
     public void deleteContractorById(UUID id) {
         Optional<Contractor> optionalContractor = contractorRepository.findById(id);
-        if (optionalContractor.isPresent()) {
-            boolean canDelete = dealRepository.checkIfDealExists(optionalContractor.get().getContractorId()) <= 1;
-            if (canDelete) {
-                optionalContractor.get().setActive(false);
-                outboxService.save(optionalContractor.get());
-                contractorRepository.save(optionalContractor.get());
-                return;
-            }
+
+        if (optionalContractor.isEmpty()) {
+            throw new EntityNotFoundException("Contractor not found with id: " + id);
+        }
+
+        boolean canDelete = dealRepository.checkIfDealExists(optionalContractor.get().getContractorId()) <= 1;
+
+        if (canDelete) {
+            optionalContractor.get().setActive(false);
+            outboxService.save(ContractorOutbox.builder()
+                    .createdDate(new Date())
+                    .main(false)
+                    .idempotentKey(UUID.randomUUID().toString())
+                    .status(ContractorOutboxStatus.CREATED)
+                    .contractorId(optionalContractor.get().getContractorId())
+                    .build());
+            contractorRepository.save(optionalContractor.get());
+        } else {
             optionalContractor.get().setActive(false);
             contractorRepository.save(optionalContractor.get());
         }
