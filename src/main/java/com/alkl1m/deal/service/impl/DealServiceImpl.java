@@ -16,9 +16,13 @@ import com.alkl1m.deal.web.payload.ChangeStatusPayload;
 import com.alkl1m.deal.web.payload.ContractorDto;
 import com.alkl1m.deal.web.payload.DealDto;
 import com.alkl1m.deal.web.payload.DealFiltersPayload;
+import com.alkl1m.deal.web.payload.DealsDto;
 import com.alkl1m.deal.web.payload.NewDealPayload;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,11 +47,11 @@ public class DealServiceImpl implements DealService {
 
 
     @Override
-    public List<DealDto> getDealsByParameters(DealFiltersPayload payload) {
+    public DealsDto getDealsByParameters(DealFiltersPayload payload, Pageable pageable) {
         Specification<Deal> spec = DealSpecifications.getDealByParameters(payload);
-        List<Deal> deals = dealRepository.findAll(spec);
+        Page<Deal> deals = dealRepository.findAll(spec, pageable);
 
-        return deals.stream()
+        List<DealDto> list = deals.getContent().stream()
                 .map(deal -> {
                     Set<ContractorDto> contractors = deal.getContractors().stream()
                             .map(ContractorDto::from)
@@ -55,6 +59,7 @@ public class DealServiceImpl implements DealService {
                     return DealDto.from(deal, contractors);
                 })
                 .toList();
+        return new DealsDto(new PageImpl<>(list, deals.getPageable(), deals.getTotalElements()));
     }
 
     @Override

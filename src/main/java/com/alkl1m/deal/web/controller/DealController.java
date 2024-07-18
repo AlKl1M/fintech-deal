@@ -6,8 +6,11 @@ import com.alkl1m.deal.service.DealService;
 import com.alkl1m.deal.web.payload.ChangeStatusPayload;
 import com.alkl1m.deal.web.payload.DealDto;
 import com.alkl1m.deal.web.payload.DealFiltersPayload;
+import com.alkl1m.deal.web.payload.DealsDto;
 import com.alkl1m.deal.web.payload.NewDealPayload;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -51,8 +55,12 @@ public class DealController {
 
     @AuditLog
     @PostMapping("/search")
-    public ResponseEntity<List<DealDto>> search(@Validated @RequestBody DealFiltersPayload payload) {
-        return ResponseEntity.ok(dealService.getDealsByParameters(payload));
+    public ResponseEntity<DealsDto> search(
+            @RequestBody DealFiltersPayload payload,
+            @RequestParam(defaultValue = "0", required = false) Integer page,
+            @RequestParam(defaultValue = "10", required = false) Integer size) {
+        Pageable paging = PageRequest.of(page, size);
+        return ResponseEntity.ok(dealService.getDealsByParameters(payload, paging));
     }
 
 }
