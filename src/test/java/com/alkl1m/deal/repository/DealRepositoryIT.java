@@ -121,7 +121,7 @@ class DealRepositoryIT {
         entityManager.persist(newContractor);
 
         int dealCount = dealRepository.checkIfDealExists(newContractor.getContractorId());
-        assertThat(dealCount).isEqualTo(0);
+        assertThat(dealCount).isZero();
     }
 
 }

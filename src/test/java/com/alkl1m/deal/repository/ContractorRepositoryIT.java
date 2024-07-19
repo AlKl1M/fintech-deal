@@ -2,7 +2,6 @@ package com.alkl1m.deal.repository;
 
 import com.alkl1m.deal.domain.entity.Contractor;
 import com.alkl1m.deal.domain.entity.Deal;
-import com.alkl1m.deal.domain.entity.Role;
 import com.alkl1m.deal.domain.entity.Status;
 import com.alkl1m.deal.domain.entity.Type;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,9 +13,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;

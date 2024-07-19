@@ -3,7 +3,6 @@ package com.alkl1m.deal.web.payload;
 import com.alkl1m.deal.domain.entity.Contractor;
 import com.alkl1m.deal.domain.entity.Role;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
 
 import java.util.Date;
 import java.util.Set;

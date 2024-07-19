@@ -76,7 +76,7 @@ public class SchedulerConfig {
      * @param scheduler  планировщик Quartz.
      */
     private void revalidateJobs(List<JobDetail> jobDetails, Scheduler scheduler) {
-        List<JobKey> jobKeys = jobDetails.stream().map(JobDetail::getKey).collect(Collectors.toList());
+        List<JobKey> jobKeys = jobDetails.stream().map(JobDetail::getKey).toList();
         try {
             scheduler.getJobKeys(GroupMatcher.jobGroupEquals(schedulerProperties.getPermamentJobsGroupName())).forEach(jobKey -> {
                 if (!jobKeys.contains(jobKey)) {
