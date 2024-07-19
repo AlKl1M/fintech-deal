@@ -34,6 +34,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Реализация сервиса для работы со сделками.
+ */
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -45,7 +48,13 @@ public class DealServiceImpl implements DealService {
     private final StatusRepository statusRepository;
     private static final String DEFAULT_USER_ID = "1";
 
-
+    /**
+     * Метод getDealsByParameters возвращает список сделок в соответствии с переданными параметрами и пагинацией.
+     *
+     * @param payload  параметры фильтрации сделок
+     * @param pageable информация о пагинации
+     * @return объект DealsDto, содержащий список сделок и информацию о пагинации
+     */
     @Override
     public DealsDto getDealsByParameters(DealFiltersPayload payload, Pageable pageable) {
         Specification<Deal> spec = DealSpecifications.getDealByParameters(payload);
@@ -62,6 +71,12 @@ public class DealServiceImpl implements DealService {
         return new DealsDto(new PageImpl<>(list, deals.getPageable(), deals.getTotalElements()));
     }
 
+    /**
+     * Метод findById находит сделку по указанному идентификатору и возвращает ее в виде объекта DealDto.
+     *
+     * @param id идентификатор сделки
+     * @return объект DealDto, представляющий найденную сделку
+     */
     @Override
     public DealDto findById(UUID id) {
         Deal deal = dealRepository.findById(id).orElseThrow(
@@ -76,6 +91,12 @@ public class DealServiceImpl implements DealService {
         return DealDto.from(deal, contractorDtos);
     }
 
+    /**
+     * Метод saveOrUpdate сохраняет или обновляет данные сделки на основе переданных данных.
+     *
+     * @param payload данные новой сделки
+     * @return объект DealDto, представляющий сохраненную или обновленную сделку
+     */
     @Override
     @Transactional
     public DealDto saveOrUpdate(NewDealPayload payload) {
@@ -95,6 +116,11 @@ public class DealServiceImpl implements DealService {
         return DealDto.from(deal, new HashSet<>());
     }
 
+    /**
+     * Метод changeStatus изменяет статус сделки на основе переданных данных.
+     *
+     * @param payload данные для изменения статуса сделки
+     */
     @Override
     @Transactional
     public void changeStatus(ChangeStatusPayload payload) {

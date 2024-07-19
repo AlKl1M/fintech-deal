@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * @author alkl1m
+ */
 @RestControllerAdvice
 public class ControllerAdvice {
     /**
@@ -52,9 +55,9 @@ public class ControllerAdvice {
     }
 
     /**
-     * Метод для обработки ContractorNotFoundException.
+     * Метод для обработки EntityNotFoundException.
      *
-     * @param e исключение ContractorNotFoundException.
+     * @param e исключение EntityNotFoundException.
      * @return объект ExceptionBody с сообщением об ошибке.
      */
     @ExceptionHandler(EntityNotFoundException.class)

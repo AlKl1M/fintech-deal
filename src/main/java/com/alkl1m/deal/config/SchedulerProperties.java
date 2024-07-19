@@ -5,10 +5,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix = "scheduler")
-@NoArgsConstructor
+/**
+ * Класс, хранящий параметры конфигурации планировщика.
+ *
+ * @author alkl1m
+ */
 @Getter
 @Setter
+@NoArgsConstructor
+@ConfigurationProperties(prefix = "scheduler")
 public class SchedulerProperties {
 
     private String permamentJobsGroupName = "PERMAMENT";

@@ -8,12 +8,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+/**
+ * Реализация сервиса для работы с шиной событий.
+ */
 @Service
 @RequiredArgsConstructor
 public class EventBusServiceImpl implements EventBusService {
 
     private final ContractorClient client;
 
+    /**
+     * Метод publishContractor публикует информацию о контрагенте через шину событий.
+     *
+     * @param contractorOutbox объект, содержащий информацию о контрагенте
+     * @return ResponseEntity<Void> с результатом публикации
+     */
     @Override
     public ResponseEntity<Void> publishContractor(ContractorOutbox contractorOutbox) {
         MainBorrowerRequest request = new MainBorrowerRequest(contractorOutbox.getContractorId(), contractorOutbox.isMain());

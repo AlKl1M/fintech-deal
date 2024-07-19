@@ -26,7 +26,7 @@ class DealControllerIT {
     @Test
     @Sql("/sql/contractors.sql")
     void testSaveOrUpdateDeal_withValidPayload_returnsValidData() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/deal/save")
+        mockMvc.perform(MockMvcRequestBuilders.put("/deal/save")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -42,14 +42,14 @@ class DealControllerIT {
                                 }
                                 """))
                 .andExpectAll(
-                    status().isOk()
+                        status().isOk()
                 );
     }
 
     @Test
     @Sql("/sql/contractors.sql")
     void testSaveOrUpdateDeal_withUpdatePayload_returnsValidData() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/deal/save")
+        mockMvc.perform(MockMvcRequestBuilders.put("/deal/save")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -76,40 +76,40 @@ class DealControllerIT {
                 .andExpectAll(
                         status().isOk(),
                         content().json("""
-                            {
-                              "id": "139916c4-9caa-402d-a464-0a2e3a74e889",
-                              "description": "Test Deal 1",
-                              "agreement_number": "AGREEMENT001",
-                              "agreement_date": "2022-01-14T22:00:00.000+00:00",
-                              "agreement_start_dt": "2022-02-01T06:00:00.000+00:00",
-                              "availability_date": "2022-02-14T22:00:00.000+00:00",
-                              "type": {
-                                "id": "CREDIT",
-                                "name": "Кредитная сделка"
-                              },
-                              "status": {
-                                "id": "DRAFT",
-                                "name": "Черновик"
-                              },
-                              "sum": 1000.00,
-                              "close_dt": "2022-03-01T10:00:00.000+00:00",
-                              "contractors": [
-                                {
-                                  "id": "fb651609-2075-453f-8b66-af3795315f26",
-                                  "contractor_id": "123456789012",
-                                  "name": "Contractor 1",
-                                  "main": true,
-                                  "roles": [
                                     {
-                                      "id": "DRAWER",
-                                      "name": "Векселедатель",
-                                      "category": "BORROWER"
+                                      "id": "139916c4-9caa-402d-a464-0a2e3a74e889",
+                                      "description": "Test Deal 1",
+                                      "agreement_number": "AGREEMENT001",
+                                      "agreement_date": "2022-01-14T22:00:00.000+00:00",
+                                      "agreement_start_dt": "2022-02-01T06:00:00.000+00:00",
+                                      "availability_date": "2022-02-14T22:00:00.000+00:00",
+                                      "type": {
+                                        "id": "CREDIT",
+                                        "name": "Кредитная сделка"
+                                      },
+                                      "status": {
+                                        "id": "DRAFT",
+                                        "name": "Черновик"
+                                      },
+                                      "sum": 1000.00,
+                                      "close_dt": "2022-03-01T10:00:00.000+00:00",
+                                      "contractors": [
+                                        {
+                                          "id": "fb651609-2075-453f-8b66-af3795315f26",
+                                          "contractor_id": "123456789012",
+                                          "name": "Contractor 1",
+                                          "main": true,
+                                          "roles": [
+                                            {
+                                              "id": "DRAWER",
+                                              "name": "Векселедатель",
+                                              "category": "BORROWER"
+                                            }
+                                          ]
+                                        }
+                                      ]
                                     }
-                                  ]
-                                }
-                              ]
-                            }
-                        """)
+                                """)
                 );
     }
 
@@ -143,8 +143,8 @@ class DealControllerIT {
                 .andExpectAll(
                         status().isBadRequest(),
                         content().json("""
-                        {"message":"Deal not found","errors":null}
-                        """)
+                                {"message":"Deal not found","errors":null}
+                                """)
                 );
     }
 

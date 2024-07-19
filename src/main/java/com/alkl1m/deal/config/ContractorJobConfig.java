@@ -10,12 +10,22 @@ import org.quartz.TriggerBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Конфигурационный класс для настройки задач планировщика Quartz, связанных с контрагентами.
+ *
+ * @author alkl1m
+ */
 @Configuration
 @RequiredArgsConstructor
 public class ContractorJobConfig {
 
     private final SchedulerProperties schedulerProperties;
 
+    /**
+     * Определяет JobDetail для задач с контрагентами.
+     *
+     * @return JobDetail для задачи с контрагентами.
+     */
     @Bean
     public JobDetail contractorJobDetail() {
         return JobBuilder.newJob(ContractorJob.class)
@@ -25,6 +35,11 @@ public class ContractorJobConfig {
                 .build();
     }
 
+    /**
+     * Определяет триггер для планирования задач с контрагентами.
+     *
+     * @return Триггер для планирования задачи с контрагентами.
+     */
     @Bean
     public Trigger showTimeTrigger() {
         return TriggerBuilder.newTrigger()

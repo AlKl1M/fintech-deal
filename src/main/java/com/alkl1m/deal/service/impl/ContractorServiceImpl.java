@@ -20,6 +20,11 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Реализация сервиса для работы с контрактными исполнителями.
+ *
+ * @author alkl1m
+ */
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -31,6 +36,12 @@ public class ContractorServiceImpl implements ContractorService {
     private final ContractorOutboxService outboxService;
     private static final String DEFAULT_USER_ID = "1";
 
+    /**
+     * Метод saveOrUpdate сохраняет или обновляет данные контрактного исполнителя на основе переданных данных.
+     *
+     * @param payload данные нового контрактного исполнителя
+     * @return объект ContractorDto, представляющий сохраненного или обновленного контрактного исполнителя
+     */
     @Override
     @Transactional
     public ContractorDto saveOrUpdate(NewContractorPayload payload) {
@@ -50,6 +61,11 @@ public class ContractorServiceImpl implements ContractorService {
         return ContractorDto.from(contractor);
     }
 
+    /**
+     * Метод deleteContractorById удаляет контрактного исполнителя по указанному идентификатору.
+     *
+     * @param id идентификатор контрактного исполнителя для удаления
+     */
     @Override
     @Transactional
     public void deleteContractorById(UUID id) {
@@ -77,6 +93,12 @@ public class ContractorServiceImpl implements ContractorService {
         }
     }
 
+    /**
+     * Метод addRoleToContractor добавляет роль к контрактному исполнителю.
+     *
+     * @param contractorId идентификатор контрактного исполнителя
+     * @param roleId       идентификатор роли
+     */
     @Override
     @Transactional
     public void addRoleToContractor(UUID contractorId, String roleId) {
@@ -91,6 +113,12 @@ public class ContractorServiceImpl implements ContractorService {
         contractorRepository.save(contractor);
     }
 
+    /**
+     * Метод deactivateRoleForContractor деактивирует роль у контрактного исполнителя.
+     *
+     * @param contractorId идентификатор контрактного исполнителя
+     * @param roleId       идентификатор роли
+     */
     @Override
     @Transactional
     public void deactivateRoleForContractor(UUID contractorId, String roleId) {

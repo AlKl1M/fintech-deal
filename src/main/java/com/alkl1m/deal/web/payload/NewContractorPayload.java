@@ -2,18 +2,46 @@ package com.alkl1m.deal.web.payload;
 
 import com.alkl1m.deal.domain.entity.Contractor;
 import com.alkl1m.deal.domain.entity.Role;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Payload для создания нового контрагента сделки.
+ *
+ * @param id уникальный идентификатор контрагента сделки.
+ * @param dealId уникальный идентификатор сделки.
+ * @param contractorId уникальный идентификатор контрагента.
+ * @param name имя контрагента.
+ * @param inn инн контрагента.
+ * @param main статус основного контрагента.
+ * @param roles список ролей контрагента
+ * @author alkl1m
+ */
 public record NewContractorPayload(
+
+        @Schema(description = "Уникальный идентификатор контрагента сделки")
         UUID id,
+
+        @Schema(description = "Уникальный идентификатор сделки")
         UUID dealId,
+
+        @Schema(description = "Уникальный идентификатор контрагента")
         String contractorId,
+
+        @Schema(description = "Имя контрагента")
         String name,
+
+        @Schema(description = "ИНН контрагента")
         String inn,
+
+        @Schema(description = "Статус основного контрагента")
         boolean main,
+
+        @Schema(description = "Список ролей контрагента")
         Set<Role> roles
 ) {
 

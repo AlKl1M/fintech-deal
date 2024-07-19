@@ -15,6 +15,11 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Конфигурационный класс для настройки основного планировщика Quartz.
+ *
+ * @author alkl1m
+ */
 @Configuration
 public class SchedulerConfig {
 
@@ -25,6 +30,15 @@ public class SchedulerConfig {
         this.schedulerProperties = schedulerProperties;
     }
 
+    /**
+     * Определяет основной Scheduler Quartz.
+     *
+     * @param triggers   список триггеров.
+     * @param jobDetails список деталей задач.
+     * @param factory    фабрика планировщика.
+     * @return основной планировщик Quartz.
+     * @throws SchedulerException если возникает ошибка при работе с планировщиком.
+     */
     @Bean
     public Scheduler scheduler(List<Trigger> triggers, List<JobDetail> jobDetails, SchedulerFactoryBean factory) throws SchedulerException {
         factory.setWaitForJobsToCompleteOnShutdown(true);
@@ -35,6 +49,12 @@ public class SchedulerConfig {
         return scheduler;
     }
 
+    /**
+     * Перепланирует триггеры в планировщике.
+     *
+     * @param triggers  список триггеров.
+     * @param scheduler планировщик Quartz.
+     */
     private void rescheduleTriggers(List<Trigger> triggers, Scheduler scheduler) {
         triggers.forEach(trigger -> {
             try {
@@ -49,6 +69,12 @@ public class SchedulerConfig {
         });
     }
 
+    /**
+     * Проверяет и удаляет невалидные задачи из планировщика.
+     *
+     * @param jobDetails список деталей задач.
+     * @param scheduler  планировщик Quartz.
+     */
     private void revalidateJobs(List<JobDetail> jobDetails, Scheduler scheduler) {
         List<JobKey> jobKeys = jobDetails.stream().map(JobDetail::getKey).collect(Collectors.toList());
         try {

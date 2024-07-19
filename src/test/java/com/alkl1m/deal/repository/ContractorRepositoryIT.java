@@ -2,6 +2,7 @@ package com.alkl1m.deal.repository;
 
 import com.alkl1m.deal.domain.entity.Contractor;
 import com.alkl1m.deal.domain.entity.Deal;
+import com.alkl1m.deal.domain.entity.Role;
 import com.alkl1m.deal.domain.entity.Status;
 import com.alkl1m.deal.domain.entity.Type;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,11 +14,14 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -113,6 +117,13 @@ class ContractorRepositoryIT {
         entityManager.persist(newContractor);
         contractorRepository.delete(newContractor);
         assertThat(entityManager.find(Contractor.class, newContractor.getId())).isNull();
+    }
+
+    @Test
+    void testExistsByDealIdAndMainTrue_withExistingData_returnsTrue() {
+        UUID dealId = newDeal.getId();
+        boolean exists = contractorRepository.existsByDealIdAndMainTrue(dealId);
+        assertTrue(exists);
     }
 
 }

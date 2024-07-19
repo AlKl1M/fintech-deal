@@ -20,12 +20,23 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Спецификация для фильтрации сделок.
+ *
+ * @author alkl1m
+ */
 public final class DealSpecifications {
 
     private DealSpecifications() {
         throw new IllegalStateException("Utility class");
     }
 
+    /**
+     * Метод для фильтрации сделок.
+     *
+     * @param payload список фильтров.
+     * @return спецификация сделок.
+     */
     public static Specification<Deal> getDealByParameters(DealFiltersPayload payload) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -47,30 +58,75 @@ public final class DealSpecifications {
         };
     }
 
+    /**
+     * Метод добавляет предикат типа LIKE в список предикатов.
+     *
+     * @param predicates список предикатов
+     * @param root корень для запроса Criteria API
+     * @param criteriaBuilder построитель критериев
+     * @param field поле для сравнения
+     * @param value значение для сравнения
+     */
     private static void addLikePredicate(List<Predicate> predicates, Root<Deal> root, CriteriaBuilder criteriaBuilder, String field, String value) {
         if (value != null) {
             predicates.add(criteriaBuilder.like(root.get(field), value));
         }
     }
 
+    /**
+     * Метод добавляет предикат типа EQUAL в список предикатов.
+     *
+     * @param predicates список предикатов
+     * @param root корень для запроса Criteria API
+     * @param criteriaBuilder построитель критериев
+     * @param field поле для сравнения
+     * @param value значение для сравнения
+     */
     private static void addEqualPredicate(List<Predicate> predicates, Root<Deal> root, CriteriaBuilder criteriaBuilder, String field, String value) {
         if (value != null) {
             predicates.add(criteriaBuilder.equal(root.get(field), value));
         }
     }
 
+    /**
+     * Метод добавляет предикат типа EQUAL в список предикатов для UUID значения.
+     *
+     * @param predicates список предикатов
+     * @param root корень для запроса Criteria API
+     * @param criteriaBuilder построитель критериев
+     * @param field поле для сравнения
+     * @param value UUID значение для сравнения
+     */
     private static void addEqualPredicate(List<Predicate> predicates, Root<Deal> root, CriteriaBuilder criteriaBuilder, String field, UUID value) {
         if (value != null) {
             predicates.add(criteriaBuilder.equal(root.get(field), value));
         }
     }
 
+    /**
+     * Метод добавляет предикат типа IN в список предикатов.
+     *
+     * @param predicates список предикатов
+     * @param root корень для запроса Criteria API
+     * @param criteriaBuilder построитель критериев
+     * @param attributeName имя атрибута
+     * @param attributeValues список значений для проверки на принадлежность
+     */
     private static void addInPredicate(List<Predicate> predicates, Root<Deal> root, CriteriaBuilder criteriaBuilder, String attributeName, List<?> attributeValues) {
         if (attributeValues != null && !attributeValues.isEmpty()) {
             predicates.add(root.get(attributeName).in(attributeValues));
         }
     }
 
+    /**
+     * Метод добавляет предикат для диапазона дат в список предикатов.
+     *
+     * @param predicates список предикатов
+     * @param root корень для запроса Criteria API
+     * @param criteriaBuilder построитель критериев
+     * @param field поле с датой для сравнения
+     * @param dateRange строка с диапазоном дат в формате "yyyy-MM-dd - yyyy-MM-dd"
+     */
     private static void addDateRangePredicate(List<Predicate> predicates, Root<Deal> root, CriteriaBuilder criteriaBuilder, String field, String dateRange) {
         Optional.ofNullable(dateRange)
                 .filter(range -> !range.isEmpty())
@@ -87,6 +143,15 @@ public final class DealSpecifications {
                 });
     }
 
+    /**
+     * Метод добавляет предикат для контрактного исполнителя в список предикатов.
+     *
+     * @param predicates список предикатов
+     * @param root корень для запроса Criteria API
+     * @param criteriaBuilder построитель критериев
+     * @param contractor данные о контрактном исполнителе для фильтрации
+     * @param category категория контрактного исполнителя
+     */
     private static void addContractorPredicate(List<Predicate> predicates, Root<Deal> root, CriteriaBuilder criteriaBuilder, ContractorFilterDto contractor, String category) {
         if (contractor != null) {
             Join<Deal, Contractor> contractorJoin = root.join("contractors");

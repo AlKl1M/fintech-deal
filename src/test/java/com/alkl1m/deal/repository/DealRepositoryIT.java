@@ -1,5 +1,6 @@
 package com.alkl1m.deal.repository;
 
+import com.alkl1m.deal.domain.entity.Contractor;
 import com.alkl1m.deal.domain.entity.Deal;
 import com.alkl1m.deal.domain.entity.Status;
 import com.alkl1m.deal.domain.entity.Type;
@@ -26,6 +27,9 @@ class DealRepositoryIT {
     DealRepository dealRepository;
 
     @Autowired
+    ContractorRepository contractorRepository;
+
+    @Autowired
     TestEntityManager entityManager;
 
     private Type type;
@@ -41,7 +45,7 @@ class DealRepositoryIT {
                 .build();
         status = Status.builder()
                 .id("TEST")
-                .name("Test status")
+                .name("TEST status")
                 .isActive(true)
                 .build();
         entityManager.persist(type);
@@ -97,6 +101,27 @@ class DealRepositoryIT {
         entityManager.persist(newDeal);
         dealRepository.delete(newDeal);
         assertThat(entityManager.find(Deal.class, newDeal.getId())).isNull();
+    }
+
+    @Test
+    void testCheckIfDealExists_withValidPayload_returns() {
+        Contractor newContractor = Contractor.builder()
+                .id(UUID.randomUUID())
+                .dealId(newDeal.getId())
+                .contractorId("TEST_CONTRACTOR_ID")
+                .name("TEST CONTRACTOR")
+                .inn("123456789")
+                .main(true)
+                .createDate(new Date())
+                .modifyDate(null)
+                .createUserId("TEST USER")
+                .modifyUserId(null)
+                .isActive(true)
+                .build();
+        entityManager.persist(newContractor);
+
+        int dealCount = dealRepository.checkIfDealExists(newContractor.getContractorId());
+        assertThat(dealCount).isEqualTo(0);
     }
 
 }
