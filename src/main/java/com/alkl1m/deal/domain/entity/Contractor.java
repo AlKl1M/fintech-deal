@@ -12,6 +12,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
 
 import java.util.Date;
 import java.util.Set;
@@ -52,15 +55,19 @@ public class Contractor {
     inverseJoinColumns = @JoinColumn(name = "contractor_role"))
     private Set<Role> roles;
 
+    @CreatedDate
     @Column(name = "create_date")
     private Date createDate;
 
+    @LastModifiedBy
     @Column(name = "modify_date")
     private Date modifyDate;
 
+    @CreatedBy
     @Column(name = "create_user_id")
     private String createUserId;
 
+    @LastModifiedBy
     @Column(name = "modify_user_id")
     private String modifyUserId;
 

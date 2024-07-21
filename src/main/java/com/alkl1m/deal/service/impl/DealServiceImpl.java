@@ -60,14 +60,13 @@ public class DealServiceImpl implements DealService {
         Specification<Deal> spec = DealSpecifications.getDealByParameters(payload);
         Page<Deal> deals = dealRepository.findAll(spec, pageable);
 
-        List<DealDto> list = deals.getContent().stream()
-                .map(deal -> {
-                    Set<ContractorDto> contractors = deal.getContractors().stream()
-                            .map(ContractorDto::from)
-                            .collect(Collectors.toSet());
-                    return DealDto.from(deal, contractors);
-                })
-                .toList();
+        List<DealDto> list = deals.stream()
+                .map(deal -> DealDto.from(deal, deal.getContractors().stream()
+                        .map(ContractorDto::from)
+                        .collect(Collectors.toSet()))
+                )
+                .collect(Collectors.toList());
+
         return new DealsDto(new PageImpl<>(list, deals.getPageable(), deals.getTotalElements()));
     }
 
@@ -100,20 +99,19 @@ public class DealServiceImpl implements DealService {
     @Override
     @Transactional
     public DealDto saveOrUpdate(NewDealPayload payload) {
-        Deal deal = new Deal();
         if (payload.id() != null && dealRepository.existsById(payload.id())) {
             Deal existingDeal = dealRepository.findById(payload.id()).orElse(null);
             if (existingDeal != null) {
-                deal = updateExistingDeal(payload, existingDeal);
-                Set<ContractorDto> contractorDtos = deal.getContractors()
+                Deal updatedDeal = updateExistingDeal(payload, existingDeal);
+                Set<ContractorDto> contractorDtos = updatedDeal.getContractors()
                         .stream()
                         .map(ContractorDto::from)
                         .collect(Collectors.toSet());
-                return DealDto.from(deal, contractorDtos);
+                return DealDto.from(updatedDeal, contractorDtos);
             }
         }
-        deal = createNewDeal(payload);
-        return DealDto.from(deal, new HashSet<>());
+        Deal newDeal = createNewDeal(payload);
+        return DealDto.from(newDeal, new HashSet<>());
     }
 
     /**
@@ -124,30 +122,26 @@ public class DealServiceImpl implements DealService {
     @Override
     @Transactional
     public void changeStatus(ChangeStatusPayload payload) {
-        Deal deal = dealRepository.findById(payload.dealId()).orElseThrow(() -> new EntityNotFoundException("Deal not found"));
-        Status status = statusRepository.findById(payload.statusId()).orElseThrow(() -> new EntityNotFoundException("Status not found"));
+        Deal deal = dealRepository.findById(payload.dealId())
+                .orElseThrow(() -> new EntityNotFoundException("Deal not found"));
+        Status status = statusRepository.findById(payload.statusId())
+                .orElseThrow(() -> new EntityNotFoundException("Status not found"));
 
         Contractor mainContractor = deal.getContractors().stream()
                 .filter(Contractor::isMain)
                 .findFirst()
                 .orElse(null);
 
-        if (mainContractor != null) {
-            if (deal.getStatus().getId().equals("DRAFT") && status.getId().equals("ACTIVE") &&
-                    dealRepository.checkIfDealExists(mainContractor.getContractorId()) <= 1) {
+        if (mainContractor != null && dealRepository.checkIfDealExists(mainContractor.getContractorId()) <= 1) {
+            if (deal.getStatus().getId().equals("DRAFT") && status.getId().equals("ACTIVE")) {
                 processDealStatusChange(deal, status, true, mainContractor.getContractorId());
-                return;
-            }
-
-            if (deal.getStatus().getId().equals("ACTIVE") && status.getId().equals("CLOSED") &&
-                    dealRepository.checkIfDealExists(mainContractor.getContractorId()) <= 1) {
+            } else if (deal.getStatus().getId().equals("ACTIVE") && status.getId().equals("CLOSED")) {
                 processDealStatusChange(deal, status, false, mainContractor.getContractorId());
-                return;
             }
+        } else {
+            deal.setStatus(status);
+            dealRepository.save(deal);
         }
-
-        deal.setStatus(status);
-        dealRepository.save(deal);
     }
 
     private void processDealStatusChange(Deal deal, Status status, boolean isActiveToActive, String contractorId) {

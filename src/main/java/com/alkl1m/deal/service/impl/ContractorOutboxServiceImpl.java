@@ -43,12 +43,13 @@ public class ContractorOutboxServiceImpl implements ContractorOutboxService {
      */
     @Transactional
     public void publishNextBatchToEventBus(int limit) {
-        Pageable pageable = PageRequest.of(0, limit, Sort.by("createdDate").ascending());
-        Page<ContractorOutbox> batch = outboxRepository.findByStatus(ContractorOutboxStatus.CREATED, pageable);
+        Page<ContractorOutbox> batch = outboxRepository.findByStatus(
+                ContractorOutboxStatus.CREATED,
+                PageRequest.of(0, limit, Sort.by("createdDate").ascending())
+        );
 
         batch.forEach(contractorOutbox -> {
-            ResponseEntity<Void> response = eventBusService.publishContractor(contractorOutbox);
-            if (response.getStatusCode().is2xxSuccessful()) {
+            if (eventBusService.publishContractor(contractorOutbox).getStatusCode().is2xxSuccessful()) {
                 contractorOutbox.setStatus(ContractorOutboxStatus.DONE);
             }
         });

@@ -10,7 +10,6 @@ public class WebClientContractorClient implements ContractorClient {
 
     private final RestClient restClient;
 
-
     @Override
     public ResponseEntity<Void> mainBorrower(MainBorrowerRequest payload) {
         return this.restClient

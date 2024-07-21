@@ -13,6 +13,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -69,15 +73,19 @@ public class Deal {
             inverseJoinColumns = @JoinColumn(name = "id"))
     private Set<Contractor> contractors;
 
+    @CreatedDate
     @Column(name = "create_date", nullable = false)
     private Date createDate;
 
+    @LastModifiedDate
     @Column(name = "modify_date")
     private Date modifyDate;
 
+    @CreatedBy
     @Column(name = "create_user_id")
     private String createUserId;
 
+    @LastModifiedBy
     @Column(name = "modify_user_id")
     private String modifyUserId;
 

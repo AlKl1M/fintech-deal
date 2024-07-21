@@ -25,7 +25,9 @@ public class EventBusServiceImpl implements EventBusService {
      */
     @Override
     public ResponseEntity<Void> publishContractor(ContractorOutbox contractorOutbox) {
-        MainBorrowerRequest request = new MainBorrowerRequest(contractorOutbox.getContractorId(), contractorOutbox.isMain());
+        MainBorrowerRequest request = new MainBorrowerRequest(
+                contractorOutbox.getContractorId(),
+                contractorOutbox.isMain());
         return client.mainBorrower(request);
     }
 }

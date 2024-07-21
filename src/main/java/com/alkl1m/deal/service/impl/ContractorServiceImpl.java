@@ -69,28 +69,24 @@ public class ContractorServiceImpl implements ContractorService {
     @Override
     @Transactional
     public void deleteContractorById(UUID id) {
-        Optional<Contractor> optionalContractor = contractorRepository.findById(id);
+        Contractor contractor = contractorRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Contractor not found with id: " + id));
 
-        if (optionalContractor.isEmpty()) {
-            throw new EntityNotFoundException("Contractor not found with id: " + id);
-        }
+        boolean canDelete = dealRepository.checkIfDealExists(contractor.getContractorId()) <= 1;
 
-        boolean canDelete = dealRepository.checkIfDealExists(optionalContractor.get().getContractorId()) <= 1;
+        contractor.setActive(false);
 
         if (canDelete) {
-            optionalContractor.get().setActive(false);
             outboxService.save(ContractorOutbox.builder()
                     .createdDate(new Date())
                     .main(false)
                     .idempotentKey(UUID.randomUUID().toString())
                     .status(ContractorOutboxStatus.CREATED)
-                    .contractorId(optionalContractor.get().getContractorId())
+                    .contractorId(contractor.getContractorId())
                     .build());
-            contractorRepository.save(optionalContractor.get());
-        } else {
-            optionalContractor.get().setActive(false);
-            contractorRepository.save(optionalContractor.get());
         }
+
+        contractorRepository.save(contractor);
     }
 
     /**
