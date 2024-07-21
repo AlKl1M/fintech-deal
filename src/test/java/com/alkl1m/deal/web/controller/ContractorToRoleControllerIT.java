@@ -33,7 +33,7 @@ class ContractorToRoleControllerIT {
 
     @Test
     @Sql("/sql/contractors.sql")
-    void testSaveOrUpdateContractor_withInvalidPayload_returnsValidData() throws Exception {
+    void testSaveOrUpdateContractor_withInvalidRoleId_returnsValidData() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/contractor-to-role/add/{id}", "fb651609-2075-453f-8b66-af3795315f26")
                         .param("roleId", "NOTEXISTINGROLE"))
                 .andExpectAll(
@@ -41,6 +41,22 @@ class ContractorToRoleControllerIT {
                         content().json("""
                                     {
                                       "message": "Role not found",
+                                      "errors": null
+                                    }
+                                """)
+                );
+    }
+
+    @Test
+    @Sql("/sql/contractors.sql")
+    void testSaveOrUpdateContractor_withInvalidContractorId_returnsValidData() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post("/contractor-to-role/add/{id}", "139916c4-9caa-402d-a464-0a2e3a74e889")
+                        .param("roleId", "DRAWER"))
+                .andExpectAll(
+                        status().isBadRequest(),
+                        content().json("""
+                                    {
+                                      "message": "Contractor not found",
                                       "errors": null
                                     }
                                 """)

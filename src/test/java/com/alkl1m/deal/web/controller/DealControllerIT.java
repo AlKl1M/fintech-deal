@@ -170,10 +170,22 @@ class DealControllerIT {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                "id": "139916c4-9caa-402d-a464-0a2e3a74e889",
-                                "description": "Test Deal 1",
-                                "agreementDateRange": "2021-03-01 - 2025-03-01",
-                                "availabilityDateRange": "2021-03-01 - 2026-03-01"
+                                  "id": "139916c4-9caa-402d-a464-0a2e3a74e889",
+                                  "description": "Test Deal 1",
+                                  "agreementDateRange": "2021-03-01 - 2025-03-01",
+                                  "availabilityDateRange": "2021-03-01 - 2026-03-01",
+                                  "type": [
+                                    {
+                                      "id": "CREDIT",
+                                      "name": "Кредитная сделка"
+                                    }
+                                  ],
+                                  "status": [
+                                    {
+                                      "id": "DRAFT",
+                                      "name": "Черновик"
+                                    }
+                                  ]
                                 }
                                 """))
                 .andExpectAll(
