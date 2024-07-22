@@ -16,8 +16,8 @@
 
     <properties>
         <java.version>21</java.version>
-        <java.compiler.source>14</java.compiler.source>
-        <java.compiler.target>14</java.compiler.target>
+        <java.compiler.source>21</java.compiler.source>
+        <java.compiler.target>21</java.compiler.target>
         <spring.boot.version>3.3.1</spring.boot.version>
         <liquibase.version>4.28.0</liquibase.version>
         <auditlog.version>0.0.1-SNAPSHOT</auditlog.version>

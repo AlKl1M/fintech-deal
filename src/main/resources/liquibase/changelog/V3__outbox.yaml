@@ -24,11 +24,6 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: idempotent_key
-                  type: text
-                  constraints:
-                    nullable: false
-              - column:
                   name: status
                   type: text
                   constraints:
