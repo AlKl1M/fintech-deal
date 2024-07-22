@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
+
 /**
  * Реализация сервиса для работы с outbox контрактных исполнителей.
  *
@@ -26,14 +28,16 @@ public class ContractorOutboxServiceImpl implements ContractorOutboxService {
     private final ContractorOutboxRepository outboxRepository;
     private final EventBusService eventBusService;
 
+
     /**
-     * Метод save сохраняет данные контрактного исполнителя в outbox.
+     * Сохраняет outbox конкретного контрагента.
      *
-     * @param contractorOutbox данные контрактного исполнителя для сохранения
+     * @param mainBorrower статус основного заемщика.
+     * @param contractorId уникальный идентификатор контрагента.
      */
     @Override
-    public void save(ContractorOutbox contractorOutbox) {
-        outboxRepository.save(contractorOutbox);
+    public void save(boolean mainBorrower, String contractorId) {
+        outboxRepository.save(createContractorOutbox(mainBorrower, contractorId));
     }
 
     /**
@@ -55,5 +59,13 @@ public class ContractorOutboxServiceImpl implements ContractorOutboxService {
         });
     }
 
+    private ContractorOutbox createContractorOutbox(boolean isMain, String contractorId) {
+        return ContractorOutbox.builder()
+                .createdDate(new Date())
+                .main(isMain)
+                .status(ContractorOutboxStatus.CREATED)
+                .contractorId(contractorId)
+                .build();
+    }
 
 }

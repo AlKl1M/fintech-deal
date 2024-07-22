@@ -45,7 +45,6 @@ spring:
             threadCount: 10
             threadsInheritContextClassLoaderOfInitializingThread: true
     auto-startup: false
-
-scheduler:
-  permanent-jobs-group-name: PERMANENT
-  show-time-job-cron: ${SHOW_TIME_JOB_CRON:*/5 * * * * ?}
+deal:
+  outbox:
+    batchSize: 10

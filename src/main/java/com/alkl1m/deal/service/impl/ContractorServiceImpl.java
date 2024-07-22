@@ -77,13 +77,7 @@ public class ContractorServiceImpl implements ContractorService {
         contractor.setActive(false);
 
         if (canDelete) {
-            outboxService.save(ContractorOutbox.builder()
-                    .createdDate(new Date())
-                    .main(false)
-                    .idempotentKey(UUID.randomUUID().toString())
-                    .status(ContractorOutboxStatus.CREATED)
-                    .contractorId(contractor.getContractorId())
-                    .build());
+            outboxService.save(false, contractor.getContractorId());
         }
 
         contractorRepository.save(contractor);

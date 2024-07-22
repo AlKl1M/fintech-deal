@@ -17,6 +17,9 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 /**
+ * Сущность для реализации outbox pattern для Contractor.
+ * Содержит информацию о сущности контрагентах и поля для отправки.
+ *
  * @author alkl1m
  */
 @Data
@@ -36,9 +39,6 @@ public class ContractorOutbox {
 
     @Column(name = "main")
     private boolean main;
-
-    @Column(name = "idempotent_key", unique = true)
-    private String idempotentKey;
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
