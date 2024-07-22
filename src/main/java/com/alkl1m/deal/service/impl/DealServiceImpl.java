@@ -1,11 +1,9 @@
 package com.alkl1m.deal.service.impl;
 
 import com.alkl1m.deal.domain.entity.Contractor;
-import com.alkl1m.deal.domain.entity.ContractorOutbox;
 import com.alkl1m.deal.domain.entity.Deal;
 import com.alkl1m.deal.domain.entity.Status;
 import com.alkl1m.deal.domain.entity.Type;
-import com.alkl1m.deal.domain.enums.ContractorOutboxStatus;
 import com.alkl1m.deal.repository.DealRepository;
 import com.alkl1m.deal.repository.StatusRepository;
 import com.alkl1m.deal.repository.TypeRepository;

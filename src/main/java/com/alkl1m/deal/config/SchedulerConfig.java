@@ -13,7 +13,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Конфигурационный класс для настройки основного планировщика Quartz.

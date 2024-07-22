@@ -1,9 +1,7 @@
 package com.alkl1m.deal.service.impl;
 
 import com.alkl1m.deal.domain.entity.Contractor;
-import com.alkl1m.deal.domain.entity.ContractorOutbox;
 import com.alkl1m.deal.domain.entity.Role;
-import com.alkl1m.deal.domain.enums.ContractorOutboxStatus;
 import com.alkl1m.deal.repository.ContractorRepository;
 import com.alkl1m.deal.repository.DealRepository;
 import com.alkl1m.deal.repository.RoleRepository;
@@ -17,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
-import java.util.Optional;
 import java.util.UUID;
 
 /**
