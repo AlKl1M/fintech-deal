@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 
 import static org.mockito.Mockito.*;
@@ -33,7 +34,7 @@ class ContractorOutboxServiceImplTest {
     private ContractorOutboxServiceImpl contractorOutboxService;
 
     @Test
-    void testPublishNextBatchToEventBus_withValidPayload_returnsValidData() {
+    void testPublishNextBatchToEventBus_with_returnsValidData() {
         int limit = 10;
         ContractorOutbox contractorOutbox1 = ContractorOutbox.builder()
                 .id(100L)
@@ -60,6 +61,8 @@ class ContractorOutboxServiceImplTest {
 
         verify(outboxRepository, times(1)).findByStatus(ContractorOutboxStatus.CREATED, PageRequest.of(0, limit, Sort.by("createdDate").ascending()));
         verify(eventBusService, times(2)).publishContractor(any());
+        assert(contractorOutbox1.getStatus() == ContractorOutboxStatus.DONE);
+        assert(contractorOutbox2.getStatus() == ContractorOutboxStatus.DONE);
     }
 
 }
