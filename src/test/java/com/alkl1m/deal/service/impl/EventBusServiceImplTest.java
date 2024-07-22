@@ -1,5 +1,6 @@
 package com.alkl1m.deal.service.impl;
 
+import com.alkl1m.deal.TestBeans;
 import com.alkl1m.deal.client.ContractorClient;
 import com.alkl1m.deal.domain.entity.ContractorOutbox;
 import com.alkl1m.deal.domain.enums.ContractorOutboxStatus;
@@ -14,17 +15,18 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.Date;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@Testcontainers
 @AutoConfigureMockMvc
+@SpringBootTest(classes = TestBeans.class)
 public class EventBusServiceImplTest {
 
     @Autowired
@@ -39,7 +41,6 @@ public class EventBusServiceImplTest {
                 .id(100L)
                 .createdDate(new Date())
                 .main(true)
-                .idempotentKey(UUID.randomUUID().toString())
                 .status(ContractorOutboxStatus.CREATED)
                 .contractorId("TEST_CONTRACTOR")
                 .build();

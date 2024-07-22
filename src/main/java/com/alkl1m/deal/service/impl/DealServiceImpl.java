@@ -147,17 +147,7 @@ public class DealServiceImpl implements DealService {
     private void processDealStatusChange(Deal deal, Status status, boolean isActiveToActive, String contractorId) {
         deal.setStatus(status);
         dealRepository.save(deal);
-        outboxService.save(createContractorOutbox(isActiveToActive, contractorId));
-    }
-
-    private ContractorOutbox createContractorOutbox(boolean isMain, String contractorId) {
-        return ContractorOutbox.builder()
-                .createdDate(new Date())
-                .main(isMain)
-                .idempotentKey(UUID.randomUUID().toString())
-                .status(ContractorOutboxStatus.CREATED)
-                .contractorId(contractorId)
-                .build();
+        outboxService.save(isActiveToActive, contractorId);
     }
 
     private Deal createNewDeal(NewDealPayload payload) {

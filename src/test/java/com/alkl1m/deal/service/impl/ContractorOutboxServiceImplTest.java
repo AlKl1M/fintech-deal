@@ -5,9 +5,11 @@ import com.alkl1m.deal.domain.enums.ContractorOutboxStatus;
 import com.alkl1m.deal.repository.ContractorOutboxRepository;
 import com.alkl1m.deal.service.EventBusService;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -16,16 +18,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.Arrays;
 import java.util.Date;
-import java.util.UUID;
 
 import static org.mockito.Mockito.*;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@AutoConfigureMockMvc
+@ExtendWith(MockitoExtension.class)
 class ContractorOutboxServiceImplTest {
 
     @Mock
@@ -44,7 +44,6 @@ class ContractorOutboxServiceImplTest {
                 .id(100L)
                 .createdDate(new Date())
                 .main(true)
-                .idempotentKey(UUID.randomUUID().toString())
                 .status(ContractorOutboxStatus.CREATED)
                 .contractorId("TEST_CONTRACTO1")
                 .build();
@@ -52,7 +51,6 @@ class ContractorOutboxServiceImplTest {
                 .id(100L)
                 .createdDate(new Date())
                 .main(true)
-                .idempotentKey(UUID.randomUUID().toString())
                 .status(ContractorOutboxStatus.CREATED)
                 .contractorId("TEST_CONTRACTOR2")
                 .build();
