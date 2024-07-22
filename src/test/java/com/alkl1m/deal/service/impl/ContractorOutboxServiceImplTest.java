@@ -34,7 +34,7 @@ class ContractorOutboxServiceImplTest {
     private ContractorOutboxServiceImpl contractorOutboxService;
 
     @Test
-    void testPublishNextBatchToEventBus_with_returnsValidData() {
+    void testPublishNextBatchToEventBus_withTwoContractorOutboxes_returnsValidData() {
         int limit = 10;
         ContractorOutbox contractorOutbox1 = ContractorOutbox.builder()
                 .id(100L)
