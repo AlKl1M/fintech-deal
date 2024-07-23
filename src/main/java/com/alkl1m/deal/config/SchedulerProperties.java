@@ -3,6 +3,7 @@ package com.alkl1m.deal.config;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -16,7 +17,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "scheduler")
 public class SchedulerProperties {
 
-    private String permamentJobsGroupName = "PERMAMENT";
-    private String contractorJobCron = "*/5 * * * * ?";
+    @Value("${deal.schedule.permamentJobsGroupName:PERMAMENT}")
+    private String permamentJobsGroupName;
+    @Value("${deal.schedule.contractorJobCron:*/5 * * * * ?}")
+    private String contractorJobCron;
 
 }

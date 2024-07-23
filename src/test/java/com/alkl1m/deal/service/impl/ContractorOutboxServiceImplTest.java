@@ -41,7 +41,7 @@ class ContractorOutboxServiceImplTest {
                 .createdDate(new Date())
                 .main(true)
                 .status(ContractorOutboxStatus.CREATED)
-                .contractorId("TEST_CONTRACTO1")
+                .contractorId("TEST_CONTRACTOR1")
                 .build();
         ContractorOutbox contractorOutbox2 = ContractorOutbox.builder()
                 .id(100L)

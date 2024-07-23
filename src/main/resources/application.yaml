@@ -48,3 +48,6 @@ spring:
 deal:
   outbox:
     batchSize: 10
+  schedule:
+    permamentJobsGroupName: "PERMAMENT"
+    contractorJobCron: "*/5 * * * * ?"
