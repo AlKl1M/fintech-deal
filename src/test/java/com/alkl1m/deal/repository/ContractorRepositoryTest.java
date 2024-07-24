@@ -14,6 +14,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
@@ -56,14 +57,14 @@ class ContractorRepositoryTest {
                 .id(UUID.randomUUID())
                 .description("TEST DESCRIPTION")
                 .agreementNumber("TESTNUMBER")
-                .agreementDate(new Date())
-                .agreementStartDt(new Date())
-                .availabilityDate(new Date())
+                .agreementDate(LocalDate.now())
+                .agreementStartDt(LocalDate.now())
+                .availabilityDate(LocalDate.now())
                 .type(type)
                 .status(status)
                 .sum(new BigDecimal(1000.00))
                 .closeDt(null)
-                .createDate(new Date())
+                .createDate(LocalDate.now())
                 .modifyDate(null)
                 .createUserId("TEST USER")
                 .modifyUserId(null)
@@ -78,7 +79,7 @@ class ContractorRepositoryTest {
                 .name("TEST CONTRACTOR")
                 .inn("123456789")
                 .main(true)
-                .createDate(new Date())
+                .createDate(LocalDate.now())
                 .modifyDate(null)
                 .createUserId("TEST USER")
                 .modifyUserId(null)

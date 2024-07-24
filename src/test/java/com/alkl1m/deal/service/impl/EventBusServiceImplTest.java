@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,7 +40,7 @@ public class EventBusServiceImplTest {
     public void testPublishContractor_withValidPayload_ReturnsValidResponse() {
         ContractorOutbox contractorOutbox = ContractorOutbox.builder()
                 .id(100L)
-                .createdDate(new Date())
+                .createdDate(LocalDate.now())
                 .main(true)
                 .status(ContractorOutboxStatus.CREATED)
                 .contractorId("TEST_CONTRACTOR")

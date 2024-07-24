@@ -17,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -47,7 +48,7 @@ class ContractorOutboxServiceImplTest {
 
         contractorOutbox1 = ContractorOutbox.builder()
                 .id(100L)
-                .createdDate(new Date())
+                .createdDate(LocalDate.now())
                 .main(true)
                 .status(ContractorOutboxStatus.CREATED)
                 .contractorId("TEST_CONTRACTOR1")
@@ -55,7 +56,7 @@ class ContractorOutboxServiceImplTest {
 
         contractorOutbox2 = ContractorOutbox.builder()
                 .id(101L)
-                .createdDate(new Date())
+                .createdDate(LocalDate.now())
                 .main(true)
                 .status(ContractorOutboxStatus.CREATED)
                 .contractorId("TEST_CONTRACTOR2")

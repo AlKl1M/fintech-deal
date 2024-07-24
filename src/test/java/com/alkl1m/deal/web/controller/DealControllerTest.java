@@ -82,9 +82,9 @@ class DealControllerTest {
                                       "id": "139916c4-9caa-402d-a464-0a2e3a74e889",
                                       "description": "Test Deal 1",
                                       "agreement_number": "AGREEMENT001",
-                                      "agreement_date": "2022-01-14T22:00:00.000+00:00",
-                                      "agreement_start_dt": "2022-02-01T06:00:00.000+00:00",
-                                      "availability_date": "2022-02-14T22:00:00.000+00:00",
+                                      "agreement_date": "2022-01-15",
+                                      "agreement_start_dt": "2022-02-01",
+                                      "availability_date": "2022-02-15",
                                       "type": {
                                         "id": "CREDIT",
                                         "name": "Кредитная сделка"
@@ -94,7 +94,7 @@ class DealControllerTest {
                                         "name": "Черновик"
                                       },
                                       "sum": 1000.00,
-                                      "close_dt": "2022-03-01T10:00:00.000+00:00",
+                                      "close_dt": "2022-03-01",
                                       "contractors": [
                                         {
                                           "id": "fb651609-2075-453f-8b66-af3795315f26",
@@ -217,9 +217,9 @@ class DealControllerTest {
                                             "id": "139916c4-9caa-402d-a464-0a2e3a74e889",
                                             "description": "Test Deal 1",
                                             "agreement_number": "AGREEMENT001",
-                                            "agreement_date": "2022-01-14T22:00:00.000+00:00",
-                                            "agreement_start_dt": "2022-02-01T06:00:00.000+00:00",
-                                            "availability_date": "2022-02-14T22:00:00.000+00:00",
+                                            "agreement_date": "2022-01-15",
+                                            "agreement_start_dt": "2022-02-01",
+                                            "availability_date": "2022-02-15",
                                             "type": {
                                               "id": "CREDIT",
                                               "name": "Кредитная сделка"
@@ -229,7 +229,7 @@ class DealControllerTest {
                                               "name": "Черновик"
                                             },
                                             "sum": 1000.00,
-                                            "close_dt": "2022-03-01T10:00:00.000+00:00",
+                                            "close_dt": "2022-03-01",
                                             "contractors": [
                                               {
                                                 "id": "fb651609-2075-453f-8b66-af3795315f26",

@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Optional;
 
@@ -36,7 +37,7 @@ class ContractorOutboxRepositoryTest {
     @BeforeEach
     void setUp() {
         outbox = ContractorOutbox.builder()
-                .createdDate(new Date())
+                .createdDate(LocalDate.now())
                 .main(true)
                 .status(ContractorOutboxStatus.CREATED)
                 .contractorId("TEST_CONTRACTOR")
@@ -54,10 +55,10 @@ class ContractorOutboxRepositoryTest {
 
     @Test
     void testUpdate_withValidPayload_returnsSameType() {
-        Date newDate = new Date();
-        outbox.setCreatedDate(newDate);
+        LocalDate createdDate = LocalDate.now();
+        outbox.setCreatedDate(createdDate);
         outboxRepository.save(outbox);
-        assertThat(entityManager.find(ContractorOutbox.class, outbox.getId()).getCreatedDate()).isEqualTo(newDate);
+        assertThat(entityManager.find(ContractorOutbox.class, outbox.getId()).getCreatedDate()).isEqualTo(createdDate);
     }
 
     @Test
