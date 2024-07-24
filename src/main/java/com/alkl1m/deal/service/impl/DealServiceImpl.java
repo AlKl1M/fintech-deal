@@ -63,7 +63,7 @@ public class DealServiceImpl implements DealService {
                         .map(ContractorDto::from)
                         .collect(Collectors.toSet()))
                 )
-                .collect(Collectors.toList());
+                .toList();
 
         return new DealsDto(new PageImpl<>(list, deals.getPageable(), deals.getTotalElements()));
     }
