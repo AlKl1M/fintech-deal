@@ -5,7 +5,6 @@ import com.alkl1m.deal.domain.entity.Role;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
 
