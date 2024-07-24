@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 7
+      author: alkl1m
+      changes:
+        - sqlFile:
+            path: liquibase/changeset/contractor_role.sql
+        - sqlFile:
+            path: liquibase/changeset/deal_status.sql
+        - sqlFile:
+            path: liquibase/changeset/deal_type.sql

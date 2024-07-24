@@ -1,0 +1,6 @@
+databaseChangeLog:
+  - includeAll:
+      path: /changelog
+      relativeToChangelogFile: true
+  - include:
+      file: org/quartz/impl/jdbcjobstore/liquibase.quartz.init.xml

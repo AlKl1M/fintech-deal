@@ -1,0 +1,53 @@
+application-version: 0.0.1-SNAPSHOT
+application-description: Deal rest api
+
+server:
+  port: 8080
+
+
+services:
+  contractor:
+    uri: http://localhost:8081
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+  datasource:
+    url: jdbc:postgresql://localhost:5433/deal
+    username: deal
+    password: deal
+    driver-class-name: org.postgresql.Driver
+  sql:
+    init:
+      mode: always
+      continue-on-error: false
+  liquibase:
+    change-log: classpath:liquibase/db.changelog.yaml
+    enabled: true
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: never
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceId: AUTO
+          jobStore:
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+            useProperties: false
+            tablePrefix: qrtz_
+            clusterCheckinInterval: 5000
+            isClustered: true
+          threadPool:
+            class: org.quartz.simpl.SimpleThreadPool
+            threadCount: 10
+            threadsInheritContextClassLoaderOfInitializingThread: true
+    auto-startup: false
+deal:
+  outbox:
+    batchSize: 10
+  schedule:
+    permamentJobsGroupName: "PERMAMENT"
+    contractorJobCron: "*/5 * * * * ?"
