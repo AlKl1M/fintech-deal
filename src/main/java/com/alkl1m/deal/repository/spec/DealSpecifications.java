@@ -12,10 +12,10 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -134,10 +134,11 @@ public final class DealSpecifications {
                 .filter(dates -> dates.length == 2)
                 .ifPresent(dates -> {
                     try {
-                        Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse(dates[0]);
-                        Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse(dates[1]);
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                        LocalDate startDate = LocalDate.parse(dates[0], formatter);
+                        LocalDate endDate = LocalDate.parse(dates[1], formatter);
                         predicates.add(criteriaBuilder.between(root.get(field), startDate, endDate));
-                    } catch (ParseException e) {
+                    } catch (DateTimeParseException e) {
                         throw new DateFormatException("Date format is yyyy-MM-dd - yyyy-MM-dd");
                     }
                 });
