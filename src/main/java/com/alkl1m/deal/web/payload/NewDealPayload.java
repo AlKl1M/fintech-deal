@@ -6,6 +6,7 @@ import com.alkl1m.deal.domain.entity.Type;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.UUID;
 
@@ -35,13 +36,13 @@ public record NewDealPayload(
         String agreementNumber,
 
         @Schema(description = "Дата договора")
-        Date agreementDate,
+        LocalDate agreementDate,
 
         @Schema(description = "Дата и время вступления соглашения в силу")
-        Date agreementStartDt,
+        LocalDate agreementStartDt,
 
         @Schema(description = "Срок действия сделки")
-        Date availabilityDate,
+        LocalDate availabilityDate,
 
         @Schema(description = "Уникальный идентификатор типа сделки")
         String typeId,
@@ -50,7 +51,7 @@ public record NewDealPayload(
         BigDecimal sum,
 
         @Schema(description = "Дата закрытия сделки")
-        Date closeDt
+        LocalDate closeDt
 ) {
     public static Deal toDeal(NewDealPayload payload, Type type, Status status, String userId) {
         return Deal.builder()
@@ -64,7 +65,7 @@ public record NewDealPayload(
                 .status(status)
                 .sum(payload.sum)
                 .closeDt(payload.closeDt)
-                .createDate(new Date())
+                .createDate(LocalDate.now())
                 .createUserId(userId)
                 .isActive(true)
                 .build();

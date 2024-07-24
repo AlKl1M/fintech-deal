@@ -25,6 +25,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -174,7 +175,7 @@ public class DealServiceImpl implements DealService {
         existingDeal.setType(type);
         existingDeal.setSum(payload.sum());
         existingDeal.setCloseDt(payload.closeDt());
-        existingDeal.setModifyDate(new Date());
+        existingDeal.setModifyDate(LocalDate.now());
         existingDeal.setModifyUserId(DEFAULT_USER_ID);
         return dealRepository.save(existingDeal);
     }

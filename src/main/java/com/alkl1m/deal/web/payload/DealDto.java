@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
@@ -43,15 +44,15 @@ public record DealDto(
 
         @JsonProperty("agreement_date")
         @Schema(description = "Дата соглашения")
-        Date agreementDate,
+        LocalDate agreementDate,
 
         @JsonProperty("agreement_start_dt")
         @Schema(description = "Дата начала действия соглашения")
-        Date agreementStartDt,
+        LocalDate agreementStartDt,
 
         @JsonProperty("availability_date")
         @Schema(description = "Дата доступности")
-        Date availabilityDate,
+        LocalDate availabilityDate,
 
         @JsonProperty("type")
         @Schema(description = "Тип сделки")
@@ -67,7 +68,7 @@ public record DealDto(
 
         @JsonProperty("close_dt")
         @Schema(description = "Дата закрытия сделки")
-        Date closeDt,
+        LocalDate closeDt,
 
         @JsonProperty("contractors")
         @Schema(description = "Список контрагентов сделки")

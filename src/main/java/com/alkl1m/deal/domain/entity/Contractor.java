@@ -16,6 +16,7 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
@@ -57,11 +58,11 @@ public class Contractor {
 
     @CreatedDate
     @Column(name = "create_date")
-    private Date createDate;
+    private LocalDate createDate;
 
     @LastModifiedBy
     @Column(name = "modify_date")
-    private Date modifyDate;
+    private LocalDate modifyDate;
 
     @CreatedBy
     @Column(name = "create_user_id")

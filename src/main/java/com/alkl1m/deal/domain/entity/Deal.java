@@ -19,6 +19,7 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
@@ -45,13 +46,13 @@ public class Deal {
     private String agreementNumber;
 
     @Column(name = "agreement_date")
-    private Date agreementDate;
+    private LocalDate agreementDate;
 
     @Column(name = "agreement_start_dt")
-    private Date agreementStartDt;
+    private LocalDate agreementStartDt;
 
     @Column(name = "availability_date")
-    private Date availabilityDate;
+    private LocalDate availabilityDate;
 
     @ManyToOne
     @JoinColumn(name = "deal_type")
@@ -65,7 +66,7 @@ public class Deal {
     private BigDecimal sum;
 
     @Column(name = "close_dt")
-    private Date closeDt;
+    private LocalDate closeDt;
 
     @ManyToMany
     @JoinTable(name = "deal_contractor",
@@ -75,11 +76,11 @@ public class Deal {
 
     @CreatedDate
     @Column(name = "create_date", nullable = false)
-    private Date createDate;
+    private LocalDate createDate;
 
     @LastModifiedDate
     @Column(name = "modify_date")
-    private Date modifyDate;
+    private LocalDate modifyDate;
 
     @CreatedBy
     @Column(name = "create_user_id")

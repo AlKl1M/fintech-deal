@@ -12,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 /**
@@ -59,7 +60,7 @@ public class ContractorOutboxServiceImpl implements ContractorOutboxService {
 
     private ContractorOutbox createContractorOutbox(boolean isMain, String contractorId) {
         return ContractorOutbox.builder()
-                .createdDate(new Date())
+                .createdDate(LocalDate.now())
                 .main(isMain)
                 .status(ContractorOutboxStatus.CREATED)
                 .contractorId(contractorId)
