@@ -20,14 +20,12 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
 @Import(TestBeans.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class DealRepositoryIT {
-
-    @Autowired
-    DealRepository dealRepository;
+class ContractorRepositoryTest {
 
     @Autowired
     ContractorRepository contractorRepository;
@@ -38,6 +36,7 @@ class DealRepositoryIT {
     private Type type;
     private Status status;
     private Deal newDeal;
+    private Contractor newContractor;
 
     @BeforeEach
     void setUp() {
@@ -48,7 +47,7 @@ class DealRepositoryIT {
                 .build();
         status = Status.builder()
                 .id("TEST")
-                .name("TEST status")
+                .name("Test status")
                 .isActive(true)
                 .build();
         entityManager.persist(type);
@@ -71,44 +70,8 @@ class DealRepositoryIT {
                 .isActive(true)
                 .build();
         entityManager.persist(newDeal);
-    }
 
-    @Test
-    void testSave_withValidPayload_returnsSameType() {
-        Deal insertedDeal = dealRepository.save(newDeal);
-        assertEquals(insertedDeal.getId(), newDeal.getId());
-        assertEquals(insertedDeal.getDescription(), newDeal.getDescription());
-        assertEquals(insertedDeal.getAgreementNumber(), newDeal.getAgreementNumber());
-        assertEquals(insertedDeal.getType(), newDeal.getType());
-        assertEquals(insertedDeal.getStatus(), newDeal.getStatus());
-        assertEquals(insertedDeal.isActive(), newDeal.isActive());
-    }
-
-    @Test
-    void testUpdate_withValidPayload_returnsSameType() {
-        String newDescription = "New description";
-        newDeal.setDescription(newDescription);
-        dealRepository.save(newDeal);
-        assertThat(entityManager.find(Deal.class, newDeal.getId()).getDescription()).isEqualTo(newDescription);
-    }
-
-    @Test
-    void testFindById_withValidPayload_returnsValidType() {
-        entityManager.persist(newDeal);
-        Optional<Deal> retrievedType = dealRepository.findById(newDeal.getId());
-        assertThat(retrievedType).contains(newDeal);
-    }
-
-    @Test
-    void testDelete_withValidPayload_returnsNoTypeInDb() {
-        entityManager.persist(newDeal);
-        dealRepository.delete(newDeal);
-        assertThat(entityManager.find(Deal.class, newDeal.getId())).isNull();
-    }
-
-    @Test
-    void testCheckIfDealExists_withValidPayload_returns() {
-        Contractor newContractor = Contractor.builder()
+        newContractor = Contractor.builder()
                 .id(UUID.randomUUID())
                 .dealId(newDeal.getId())
                 .contractorId("TEST_CONTRACTOR_ID")
@@ -122,9 +85,45 @@ class DealRepositoryIT {
                 .isActive(true)
                 .build();
         entityManager.persist(newContractor);
+    }
 
-        int dealCount = dealRepository.checkIfDealExists(newContractor.getContractorId());
-        assertThat(dealCount).isZero();
+    @Test
+    void testSave_withValidPayload_returnsSameType() {
+        Contractor insertedContractor = contractorRepository.save(newContractor);
+        assertEquals(insertedContractor.getId(), newContractor.getId());
+        assertEquals(insertedContractor.getDealId(), newContractor.getDealId());
+        assertEquals(insertedContractor.getContractorId(), newContractor.getContractorId());
+        assertEquals(insertedContractor.getName(), newContractor.getName());
+        assertEquals(insertedContractor.isMain(), newContractor.isMain());
+    }
+
+    @Test
+    void testUpdate_withValidPayload_returnsSameType() {
+        String newName = "New name";
+        newContractor.setName(newName);
+        contractorRepository.save(newContractor);
+        assertThat(entityManager.find(Contractor.class, newContractor.getId()).getName()).isEqualTo(newName);
+    }
+
+    @Test
+    void testFindById_withValidPayload_returnsValidType() {
+        entityManager.persist(newContractor);
+        Optional<Contractor> retrievedContractor = contractorRepository.findById(newContractor.getId());
+        assertThat(retrievedContractor).contains(newContractor);
+    }
+
+    @Test
+    void testDelete_withValidPayload_returnsNoTypeInDb() {
+        entityManager.persist(newContractor);
+        contractorRepository.delete(newContractor);
+        assertThat(entityManager.find(Contractor.class, newContractor.getId())).isNull();
+    }
+
+    @Test
+    void testExistsByDealIdAndMainTrue_withExistingData_returnsTrue() {
+        UUID dealId = newDeal.getId();
+        boolean exists = contractorRepository.existsByDealIdAndMainTrue(dealId);
+        assertTrue(exists);
     }
 
 }

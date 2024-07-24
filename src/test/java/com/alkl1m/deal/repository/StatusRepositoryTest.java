@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DataJpaTest
 @Import(TestBeans.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class StatusRepositoryIT {
+class StatusRepositoryTest {
 
     @Autowired
     StatusRepository statusRepository;

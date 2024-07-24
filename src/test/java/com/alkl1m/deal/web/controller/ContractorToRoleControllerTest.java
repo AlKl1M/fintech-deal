@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Testcontainers
 @AutoConfigureMockMvc
 @SpringBootTest(classes = TestBeans.class)
-class ContractorToRoleControllerIT {
+class ContractorToRoleControllerTest {
 
     @Autowired
     MockMvc mockMvc;

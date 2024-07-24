@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DataJpaTest
 @Import(TestBeans.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class ContractorOutboxRepositoryIT {
+class ContractorOutboxRepositoryTest {
 
     @Autowired
     ContractorOutboxRepository outboxRepository;
