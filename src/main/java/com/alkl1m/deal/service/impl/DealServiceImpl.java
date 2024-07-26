@@ -22,6 +22,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,7 +57,11 @@ public class DealServiceImpl implements DealService {
      * @return объект DealsDto, содержащий список сделок и информацию о пагинации
      */
     @Override
-    public DealsDto getDealsByParameters(DealFiltersPayload payload, Pageable pageable) {
+    public DealsDto getDealsByParameters(DealFiltersPayload payload, Pageable pageable, Authentication authentication) {
+        Set<String> userRoles = getUserRoles(authentication);
+
+        validateUserRoles(payload, userRoles);
+
         Specification<Deal> spec = DealSpecifications.getDealByParameters(payload);
         Page<Deal> deals = dealRepository.findAll(spec, pageable);
 
@@ -177,6 +184,29 @@ public class DealServiceImpl implements DealService {
         existingDeal.setModifyDate(LocalDate.now());
         existingDeal.setModifyUserId(DEFAULT_USER_ID);
         return dealRepository.save(existingDeal);
+    }
+
+    private Set<String> getUserRoles(Authentication authentication) {
+        return authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toSet());
+    }
+
+    private void validateUserRoles(DealFiltersPayload payload, Set<String> userRoles) {
+        boolean isCreditUser = userRoles.contains("CREDIT_USER");
+        boolean isOverdraftUser = userRoles.contains("OVERDRAFT_USER");
+
+        if (isCreditUser) {
+            if (payload.type().size() != 1 || !payload.type().get(0).getId().equals("CREDIT")) {
+                throw new AuthenticationServiceException("Wrong");
+            }
+        }
+
+        if (isOverdraftUser) {
+            if (payload.type().size() != 1 || !payload.type().get(0).getId().equals("OVERDRAFT")) {
+                throw new AuthenticationServiceException("Wrong");
+            }
+        }
     }
 
 }

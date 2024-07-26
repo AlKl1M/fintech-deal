@@ -15,9 +15,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
+import org.apache.tomcat.websocket.AuthenticationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -29,7 +35,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.Principal;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @author alkl1m
@@ -134,9 +143,14 @@ public class DealController {
     public ResponseEntity<DealsDto> search(
             @RequestBody DealFiltersPayload payload,
             @RequestParam(defaultValue = "0", required = false) Integer page,
-            @RequestParam(defaultValue = "10", required = false) Integer size) {
+            @RequestParam(defaultValue = "10", required = false) Integer size,
+            Principal principal
+            ) {
+
+        Authentication authentication = (Authentication) principal;
+
         Pageable paging = PageRequest.of(page, size);
-        return ResponseEntity.ok(dealService.getDealsByParameters(payload, paging));
+        return ResponseEntity.ok(dealService.getDealsByParameters(payload, paging, authentication));
     }
 
 }
