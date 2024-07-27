@@ -1,6 +1,10 @@
 package com.alkl1m.deal.web.controller;
 
+import com.alkl1m.deal.JwtUtil;
 import com.alkl1m.deal.TestBeans;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -11,6 +15,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -27,8 +37,11 @@ class ContractorControllerTest {
     @Test
     @Sql("/sql/contractors.sql")
     void testSaveContractor_withValidPayload_returnsValidData() throws Exception {
+        List<String> roles = Arrays.asList("SUPERUSER");
+        String jwt = JwtUtil.generateJwt("superuser", roles);
         mockMvc.perform(MockMvcRequestBuilders.put("/deal-contractor/save")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(new Cookie("jwt", jwt))
                         .content("""
                                 {
                                   "id": null,
@@ -46,9 +59,35 @@ class ContractorControllerTest {
 
     @Test
     @Sql("/sql/contractors.sql")
-    void testUpdateContractor_withValidPayload_returnsValidData() throws Exception {
+    void testSaveContractor_withInvalidUser_returnsValidData() throws Exception {
+        List<String> roles = Arrays.asList("USER");
+        String jwt = JwtUtil.generateJwt("user", roles);
         mockMvc.perform(MockMvcRequestBuilders.put("/deal-contractor/save")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(new Cookie("jwt", jwt))
+                        .content("""
+                                {
+                                  "id": null,
+                                  "dealId": "139916c4-9caa-402d-a464-0a2e3a74e889",
+                                  "contractorId": "contractor4",
+                                  "name": "contractor4",
+                                  "inn": "0123456789",
+                                  "main": false
+                                }
+                                """))
+                .andExpectAll(
+                        status().isForbidden()
+                );
+    }
+
+    @Test
+    @Sql("/sql/contractors.sql")
+    void testUpdateContractor_withValidPayload_returnsValidData() throws Exception {
+        List<String> roles = Arrays.asList("SUPERUSER");
+        String jwt = JwtUtil.generateJwt("superuser", roles);
+        mockMvc.perform(MockMvcRequestBuilders.put("/deal-contractor/save")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(new Cookie("jwt", jwt))
                         .content("""
                                 {
                                   "id": "fb651609-2075-453f-8b66-af3795315f26",
@@ -82,7 +121,11 @@ class ContractorControllerTest {
     @Test
     @Sql("/sql/contractors.sql")
     void testDeleteContractor_withValidPayload_returnsValidData() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/deal-contractor/delete/{id}", "fb651609-2075-453f-8b66-af3795315f26"))
+        List<String> roles = Arrays.asList("SUPERUSER");
+        String jwt = JwtUtil.generateJwt("superuser", roles);
+        mockMvc.perform(MockMvcRequestBuilders.delete("/deal-contractor/delete/{id}", "fb651609-2075-453f-8b66-af3795315f26")
+                        .cookie(new Cookie("jwt", jwt))
+                )
                 .andExpectAll(
                         status().isOk()
                 );
@@ -91,7 +134,11 @@ class ContractorControllerTest {
     @Test
     @Sql("/sql/contractors.sql")
     void testDeleteContractor_withInvalidPayload_returnsValidData() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/deal-contractor/delete/{id}", "79ebe316-4306-43ae-884b-a05f98dd16a6"))
+        List<String> roles = Arrays.asList("SUPERUSER");
+        String jwt = JwtUtil.generateJwt("superuser", roles);
+        mockMvc.perform(MockMvcRequestBuilders.delete("/deal-contractor/delete/{id}", "79ebe316-4306-43ae-884b-a05f98dd16a6")
+                        .cookie(new Cookie("jwt", jwt))
+                )
                 .andExpectAll(
                         status().isBadRequest(),
                         content().json("""

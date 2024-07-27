@@ -1,17 +1,29 @@
 package com.alkl1m.deal.web.controller;
 
+import com.alkl1m.deal.JwtUtil;
 import com.alkl1m.deal.TestBeans;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -28,8 +40,11 @@ class DealControllerTest {
     @Test
     @Sql("/sql/contractors.sql")
     void testSaveOrUpdateDeal_withValidPayload_returnsValidData() throws Exception {
+        List<String> roles = Arrays.asList("SUPERUSER");
+        String jwt = JwtUtil.generateJwt("superuser", roles);
         mockMvc.perform(MockMvcRequestBuilders.put("/deal/save")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(new Cookie("jwt", jwt))
                         .content("""
                                 {
                                   "id": null,
@@ -50,9 +65,64 @@ class DealControllerTest {
 
     @Test
     @Sql("/sql/contractors.sql")
-    void testSaveOrUpdateDeal_withUpdatePayload_returnsValidData() throws Exception {
+    void testSaveOrUpdateDeal_withValidDealSuperuser_returnsValidData() throws Exception {
+        List<String> roles = Arrays.asList("DEAL_SUPERUSER");
+        String jwt = JwtUtil.generateJwt("dealsuperuser", roles);
         mockMvc.perform(MockMvcRequestBuilders.put("/deal/save")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(new Cookie("jwt", jwt))
+                        .content("""
+                                {
+                                  "id": null,
+                                  "description": "Сделка 000d3",
+                                  "agreementNumber": "003-01",
+                                  "agreementDate": "2023-03-01",
+                                  "agreementStartDt": "2024-04-01",
+                                  "availabilityDate": "2025-03-01",
+                                  "typeId": "CREDIT",
+                                  "sum": "3000.00",
+                                  "closeDt": null
+                                }
+                                """))
+                .andExpectAll(
+                        status().isOk()
+                );
+    }
+
+    @Test
+    @Sql("/sql/contractors.sql")
+    void testSaveOrUpdateDeal_withInvalidUser_returnsValidData() throws Exception {
+        List<String> roles = Arrays.asList("USER");
+        String jwt = JwtUtil.generateJwt("user", roles);
+        mockMvc.perform(MockMvcRequestBuilders.put("/deal/save")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(new Cookie("jwt", jwt))
+                        .content("""
+                                {
+                                  "id": null,
+                                  "description": "Сделка 000d3",
+                                  "agreementNumber": "003-01",
+                                  "agreementDate": "2023-03-01",
+                                  "agreementStartDt": "2024-04-01",
+                                  "availabilityDate": "2025-03-01",
+                                  "typeId": "CREDIT",
+                                  "sum": "3000.00",
+                                  "closeDt": null
+                                }
+                                """))
+                .andExpectAll(
+                        status().isForbidden()
+                );
+    }
+
+    @Test
+    @Sql("/sql/contractors.sql")
+    void testSaveOrUpdateDeal_withUpdatePayload_returnsValidData() throws Exception {
+        List<String> roles = Arrays.asList("SUPERUSER");
+        String jwt = JwtUtil.generateJwt("superuser", roles);
+        mockMvc.perform(MockMvcRequestBuilders.put("/deal/save")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(new Cookie("jwt", jwt))
                         .content("""
                                 {
                                   "id": "139916c4-9caa-402d-a464-0a2e3a74e889",
@@ -73,8 +143,12 @@ class DealControllerTest {
 
     @Test
     @Sql("/sql/contractors.sql")
-    void testFindById_withValidId_returnsValidData() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/deal/{id}", "139916c4-9caa-402d-a464-0a2e3a74e889"))
+    void testFindById_withValidIdAndUser_returnsValidData() throws Exception {
+        List<String> roles = Arrays.asList("USER");
+        String jwt = JwtUtil.generateJwt("user", roles);
+        mockMvc.perform(MockMvcRequestBuilders.get("/deal/{id}", "139916c4-9caa-402d-a464-0a2e3a74e889")
+                        .cookie(new Cookie("jwt", jwt))
+                )
                 .andExpectAll(
                         status().isOk(),
                         content().json("""
@@ -117,9 +191,12 @@ class DealControllerTest {
 
     @Test
     @Sql("/sql/contractors.sql")
-    void testChangeStatus_withValidPayload_returnsValidData() throws Exception {
+    void testChangeStatus_withValidPayloadAndDealSuperUser_returnsValidData() throws Exception {
+        List<String> roles = Arrays.asList("DEAL_SUPERUSER");
+        String jwt = JwtUtil.generateJwt("dealsuperuser", roles);
         mockMvc.perform(MockMvcRequestBuilders.patch("/deal/change")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(new Cookie("jwt", jwt))
                         .content("""
                                 {
                                     "dealId": "139916c4-9caa-402d-a464-0a2e3a74e889",
@@ -133,9 +210,31 @@ class DealControllerTest {
 
     @Test
     @Sql("/sql/contractors.sql")
-    void testChangeStatus_withNotExistingDeal_returnsValidData() throws Exception {
+    void testChangeStatus_withValidPayloadAndUser_returnsValidData() throws Exception {
+        List<String> roles = Arrays.asList("USER");
+        String jwt = JwtUtil.generateJwt("user", roles);
         mockMvc.perform(MockMvcRequestBuilders.patch("/deal/change")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(new Cookie("jwt", jwt))
+                        .content("""
+                                {
+                                    "dealId": "139916c4-9caa-402d-a464-0a2e3a74e889",
+                                    "statusId": "DRAFT"
+                                }
+                                """))
+                .andExpectAll(
+                        status().isForbidden()
+                );
+    }
+
+    @Test
+    @Sql("/sql/contractors.sql")
+    void testChangeStatus_withNotExistingDeal_returnsValidData() throws Exception {
+        List<String> roles = Arrays.asList("SUPERUSER");
+        String jwt = JwtUtil.generateJwt("dealsuperuser", roles);
+        mockMvc.perform(MockMvcRequestBuilders.patch("/deal/change")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(new Cookie("jwt", jwt))
                         .content("""
                                 {
                                     "dealId": "fb651609-2075-453f-8b66-af3795315f26",
@@ -153,7 +252,11 @@ class DealControllerTest {
     @Test
     @Sql("/sql/contractors.sql")
     void testFindById_withInvalidId_returnsValidData() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/deal/{id}", "fb651609-2075-453f-8b66-af3795315f26"))
+        List<String> roles = Arrays.asList("USER");
+        String jwt = JwtUtil.generateJwt("user", roles);
+        mockMvc.perform(MockMvcRequestBuilders.get("/deal/{id}", "fb651609-2075-453f-8b66-af3795315f26")
+                        .cookie(new Cookie("jwt", jwt))
+                )
                 .andExpectAll(
                         status().isBadRequest(),
                         content().json("""
@@ -168,8 +271,11 @@ class DealControllerTest {
     @Test
     @Sql("/sql/contractors.sql")
     void testSearchDeal_withValidPayload_returnsValidData() throws Exception {
+        List<String> roles = Arrays.asList("SUPERUSER");
+        String jwt = JwtUtil.generateJwt("superuser", roles);
         mockMvc.perform(MockMvcRequestBuilders.post("/deal/search")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(new Cookie("jwt", jwt))
                         .content("""
                                 {
                                   "id": "139916c4-9caa-402d-a464-0a2e3a74e889",
@@ -258,6 +364,75 @@ class DealControllerTest {
                                       }
                                     }
                                 """)
+                );
+    }
+
+    @Test
+    @Sql("/sql/contractors.sql")
+    void testSearchDeal_withValidCreditUser_returnsValidData() throws Exception {
+        List<String> roles = Arrays.asList("CREDIT_USER");
+        String jwt = JwtUtil.generateJwt("credituser", roles);
+        mockMvc.perform(MockMvcRequestBuilders.post("/deal/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(new Cookie("jwt", jwt))
+                        .content("""
+                                {
+                                  "type": [
+                                    {
+                                      "id": "CREDIT",
+                                      "name": "Кредитная сделка"
+                                    }
+                                  ]
+                                }
+                                """))
+                .andExpectAll(
+                        status().isOk()
+                );
+    }
+
+    @Test
+    @Sql("/sql/contractors.sql")
+    void testSearchDeal_withOverdraftTypeWithCreditUser_returnsValidData() throws Exception {
+        List<String> roles = Arrays.asList("CREDIT_USER");
+        String jwt = JwtUtil.generateJwt("credituser", roles);
+        mockMvc.perform(MockMvcRequestBuilders.post("/deal/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(new Cookie("jwt", jwt))
+                        .content("""
+                                {
+                                  "type": [
+                                    {
+                                      "id": "OVERDRAFT",
+                                      "name": "Овердрафт"
+                                    }
+                                  ]
+                                }
+                                """))
+                .andExpectAll(
+                        status().isForbidden()
+                );
+    }
+
+    @Test
+    @Sql("/sql/contractors.sql")
+    void testSearchDeal_withCreditTypeWithOverdraftUser_returnsValidData() throws Exception {
+        List<String> roles = Arrays.asList("OVERDRAFT_USER");
+        String jwt = JwtUtil.generateJwt("overdraftuser", roles);
+        mockMvc.perform(MockMvcRequestBuilders.post("/deal/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(new Cookie("jwt", jwt))
+                        .content("""
+                                {
+                                  "type": [
+                                    {
+                                      "id": "CREDIT",
+                                      "name": "Кредитная сделка"
+                                    }
+                                  ]
+                                }
+                                """))
+                .andExpectAll(
+                        status().isForbidden()
                 );
     }
 
