@@ -42,6 +42,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/deal/search").hasAnyAuthority("CREDIT_USER", "OVERDRAFT_USER", "DEAL_SUPERUSER", "SUPERUSER")
                                 .requestMatchers(HttpMethod.DELETE, "/**").hasAnyAuthority("DEAL_SUPERUSER", "SUPERUSER")
                                 .requestMatchers("/deal-contractor/**").hasAnyAuthority("DEAL_SUPERUSER", "SUPERUSER")
+                                .requestMatchers("/contractor-to-role/**").hasAnyAuthority("DEAL_SUPERUSER", "SUPERUSER")
                                 .anyRequest().authenticated());
 
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
