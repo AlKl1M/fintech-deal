@@ -1,5 +1,6 @@
 package com.alkl1m.deal.filter;
 
+import com.alkl1m.deal.service.impl.UserDetailsImpl;
 import com.alkl1m.deal.util.JwtUtils;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -10,14 +11,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.WebUtils;
 
 import java.io.IOException;
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -33,14 +32,22 @@ public class JwtFilter extends OncePerRequestFilter {
             String jwt = cookie.getValue();
             try {
                 Claims claims = jwtUtils.parseJwt(jwt);
-                String login = jwtUtils.getLoginFromClaims(claims);
 
-                List<GrantedAuthority> authorities = jwtUtils.getAuthoritiesFromClaims(claims);
+                if (jwtUtils.isTokenExpired(claims)) {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "JWT токен истек");
+                    return;
+                }
 
-                Authentication authentication = new UsernamePasswordAuthenticationToken(login, null, authorities);
+                UserDetailsImpl userDetails = UserDetailsImpl.build(
+                        String.valueOf(jwtUtils.getIdFromClaims(claims)),
+                        jwtUtils.getLoginFromClaims(claims),
+                        jwtUtils.getAuthoritiesFromClaims(claims)
+                );
+
+                Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (Exception e) {
-                // TODO
+                logger.error("Не получается выполнить аутентификацию юзеру: {}", e);
             }
         }
         filterChain.doFilter(request, response);

@@ -47,7 +47,6 @@ public class DealServiceImpl implements DealService {
     private final TypeRepository typeRepository;
     private final ContractorOutboxService outboxService;
     private final StatusRepository statusRepository;
-    private static final String DEFAULT_USER_ID = "1";
 
     /**
      * Метод getDealsByParameters возвращает список сделок в соответствии с переданными параметрами и пагинацией.
@@ -57,8 +56,8 @@ public class DealServiceImpl implements DealService {
      * @return объект DealsDto, содержащий список сделок и информацию о пагинации
      */
     @Override
-    public DealsDto getDealsByParameters(DealFiltersPayload payload, Pageable pageable, Authentication authentication) {
-        Set<String> userRoles = getUserRoles(authentication);
+    public DealsDto getDealsByParameters(DealFiltersPayload payload, Pageable pageable, UserDetailsImpl userDetails) {
+        Set<String> userRoles = getUserRoles(userDetails);
 
         validateUserRoles(payload, userRoles);
 
@@ -103,11 +102,11 @@ public class DealServiceImpl implements DealService {
      */
     @Override
     @Transactional
-    public DealDto saveOrUpdate(NewDealPayload payload) {
+    public DealDto saveOrUpdate(NewDealPayload payload, String userId) {
         if (payload.id() != null && dealRepository.existsById(payload.id())) {
             Deal existingDeal = dealRepository.findById(payload.id()).orElse(null);
             if (existingDeal != null) {
-                Deal updatedDeal = updateExistingDeal(payload, existingDeal);
+                Deal updatedDeal = updateExistingDeal(payload, existingDeal, userId);
                 Set<ContractorDto> contractorDtos = updatedDeal.getContractors()
                         .stream()
                         .map(ContractorDto::from)
@@ -115,7 +114,7 @@ public class DealServiceImpl implements DealService {
                 return DealDto.from(updatedDeal, contractorDtos);
             }
         }
-        Deal newDeal = createNewDeal(payload);
+        Deal newDeal = createNewDeal(payload, userId);
         return DealDto.from(newDeal, new HashSet<>());
     }
 
@@ -126,7 +125,7 @@ public class DealServiceImpl implements DealService {
      */
     @Override
     @Transactional
-    public void changeStatus(ChangeStatusPayload payload) {
+    public void changeStatus(ChangeStatusPayload payload, String userId) {
         Deal deal = dealRepository.findById(payload.dealId())
                 .orElseThrow(() -> new EntityNotFoundException("Deal not found"));
         Status status = statusRepository.findById(payload.statusId())
@@ -139,9 +138,9 @@ public class DealServiceImpl implements DealService {
 
         if (mainContractor != null && dealRepository.checkIfDealExists(mainContractor.getContractorId()) <= 1) {
             if (deal.getStatus().getId().equals("DRAFT") && status.getId().equals("ACTIVE")) {
-                processDealStatusChange(deal, status, true, mainContractor.getContractorId());
+                processDealStatusChange(deal, status, true, mainContractor.getContractorId(), userId);
             } else if (deal.getStatus().getId().equals("ACTIVE") && status.getId().equals("CLOSED")) {
-                processDealStatusChange(deal, status, false, mainContractor.getContractorId());
+                processDealStatusChange(deal, status, false, mainContractor.getContractorId(), userId);
             }
         } else {
             deal.setStatus(status);
@@ -149,26 +148,26 @@ public class DealServiceImpl implements DealService {
         }
     }
 
-    private void processDealStatusChange(Deal deal, Status status, boolean isActiveToActive, String contractorId) {
+    private void processDealStatusChange(Deal deal, Status status, boolean isActiveToActive, String contractorId, String userId) {
         deal.setStatus(status);
         dealRepository.save(deal);
         outboxService.save(isActiveToActive, contractorId);
     }
 
-    private Deal createNewDeal(NewDealPayload payload) {
+    private Deal createNewDeal(NewDealPayload payload, String userId) {
         Type type = typeRepository.findById(payload.typeId()).orElseThrow(
                 () -> new EntityNotFoundException("Type not found")
         );
         Status status = statusRepository.findById("DRAFT").orElseThrow(
                 () -> new EntityNotFoundException("Status not found")
         );
-        Deal deal = NewDealPayload.toDeal(payload, type, status, DEFAULT_USER_ID);
+        Deal deal = NewDealPayload.toDeal(payload, type, status, userId);
         deal.setId(UUID.randomUUID());
 
         return dealRepository.save(deal);
     }
 
-    private Deal updateExistingDeal(NewDealPayload payload, Deal existingDeal) {
+    private Deal updateExistingDeal(NewDealPayload payload, Deal existingDeal, String userId) {
         Type type = typeRepository.findById(payload.typeId()).orElseThrow(
                 () -> new EntityNotFoundException("Type not found")
         );
@@ -182,29 +181,28 @@ public class DealServiceImpl implements DealService {
         existingDeal.setSum(payload.sum());
         existingDeal.setCloseDt(payload.closeDt());
         existingDeal.setModifyDate(LocalDate.now());
-        existingDeal.setModifyUserId(DEFAULT_USER_ID);
+        existingDeal.setModifyUserId(userId);
         return dealRepository.save(existingDeal);
     }
 
-    private Set<String> getUserRoles(Authentication authentication) {
-        return authentication.getAuthorities().stream()
+    private Set<String> getUserRoles(UserDetailsImpl userDetails) {
+        return userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toSet());
     }
 
     private void validateUserRoles(DealFiltersPayload payload, Set<String> userRoles) {
-        boolean isCreditUser = userRoles.contains("CREDIT_USER");
-        boolean isOverdraftUser = userRoles.contains("OVERDRAFT_USER");
+        String expectedType = null;
 
-        if (isCreditUser) {
-            if (payload.type().size() != 1 || !payload.type().get(0).getId().equals("CREDIT")) {
-                throw new AuthenticationServiceException("Wrong");
-            }
+        if (userRoles.contains("CREDIT_USER")) {
+            expectedType = "CREDIT";
+        } else if (userRoles.contains("OVERDRAFT_USER")) {
+            expectedType = "OVERDRAFT";
         }
 
-        if (isOverdraftUser) {
-            if (payload.type().size() != 1 || !payload.type().get(0).getId().equals("OVERDRAFT")) {
-                throw new AuthenticationServiceException("Wrong");
+        if (expectedType != null) {
+            if (payload.type().size() != 1 || !payload.type().get(0).getId().equals(expectedType)) {
+                throw new AuthenticationServiceException("Пользователь с такой ролью не может просматривать эти данные.");
             }
         }
     }
