@@ -1,4 +1,4 @@
-package com.alkl1m.deal.filter;
+package com.alkl1m.deal.security.filter;
 
 import com.alkl1m.deal.service.impl.UserDetailsImpl;
 import com.alkl1m.deal.util.JwtUtils;
@@ -18,12 +18,28 @@ import org.springframework.web.util.WebUtils;
 
 import java.io.IOException;
 
+/**
+ * Фильтрация HTTP-запросов и проверка наличия и валидности JWT в запросах.
+ * Извлекает токен из куки, проверяет его и устанавливает аутентификацию для пользователя.
+ *
+ * @author alkl1m
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;
 
+    /**
+     * Фильтр для запроса. Проверяет наличие JWT в запросе и,
+     * если токен действителен, аутентифицирует его.
+     *
+     * @param request     запрос.
+     * @param response    ответ.
+     * @param filterChain цепочка фильтров.
+     * @throws ServletException если ошибка при обработке запроса.
+     * @throws IOException      если ошибка ввода-вывода.
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         Cookie cookie = WebUtils.getCookie(request, "jwt");

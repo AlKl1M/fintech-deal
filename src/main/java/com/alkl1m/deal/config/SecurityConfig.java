@@ -1,6 +1,6 @@
 package com.alkl1m.deal.config;
 
-import com.alkl1m.deal.filter.JwtFilter;
+import com.alkl1m.deal.security.filter.JwtFilter;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
