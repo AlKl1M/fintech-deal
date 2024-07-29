@@ -27,6 +27,8 @@ public class JwtUtils {
     @Value("${application.security.jwt.secret}")
     private String jwtSecret;
 
+    private final Integer serviceId = 1;
+
     /**
      * Парсит JWT и извлекает его полезную нагрузку (claims).
      *
@@ -92,7 +94,7 @@ public class JwtUtils {
      */
     public String generateServiceJwtToken() {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("id", 1);
+        claims.put("id", serviceId);
         claims.put("roles", List.of("SUPERUSER"));
 
         return Jwts
