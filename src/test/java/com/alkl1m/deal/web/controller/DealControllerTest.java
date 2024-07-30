@@ -2,6 +2,7 @@ package com.alkl1m.deal.web.controller;
 
 import com.alkl1m.deal.JwtUtil;
 import com.alkl1m.deal.TestBeans;
+import com.alkl1m.deal.domain.enums.ERole;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.servlet.http.Cookie;
@@ -433,6 +434,42 @@ class DealControllerTest {
                                 """))
                 .andExpectAll(
                         status().isForbidden()
+                );
+    }
+
+    @Test
+    @Sql("/sql/contractors.sql")
+    void testSearchDeal_withEmptyTypeForOverdraft_returnsValidData() throws Exception {
+        List<String> roles = Arrays.asList("OVERDRAFT_USER");
+        String jwt = JwtUtil.generateJwt("overdraftuser", roles);
+        mockMvc.perform(MockMvcRequestBuilders.post("/deal/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(new Cookie("jwt", jwt))
+                        .content("""
+                                {
+                                  "type": []
+                                }
+                                """))
+                .andExpectAll(
+                        status().isOk()
+                );
+    }
+
+    @Test
+    @Sql("/sql/contractors.sql")
+    void testSearchDeal_withEmptyTypeForCredit_returnsValidData() throws Exception {
+        List<String> roles = Arrays.asList(ERole.CREDIT_USER.toString());
+        String jwt = JwtUtil.generateJwt("credituser", roles);
+        mockMvc.perform(MockMvcRequestBuilders.post("/deal/search")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(new Cookie("jwt", jwt))
+                        .content("""
+                                {
+                                  
+                                }
+                                """))
+                .andExpectAll(
+                        status().isOk()
                 );
     }
 
