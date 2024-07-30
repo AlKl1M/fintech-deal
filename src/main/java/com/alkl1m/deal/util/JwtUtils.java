@@ -1,5 +1,6 @@
 package com.alkl1m.deal.util;
 
+import com.alkl1m.deal.domain.enums.ERole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -14,6 +15,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -95,7 +97,7 @@ public class JwtUtils {
     public String generateServiceJwtToken() {
         Map<String, Object> claims = new HashMap<>();
         claims.put("id", serviceId);
-        claims.put("roles", List.of("SUPERUSER"));
+        claims.put("roles", List.of(ERole.SUPERUSER));
 
         return Jwts
                 .builder()

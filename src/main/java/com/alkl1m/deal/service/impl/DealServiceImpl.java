@@ -4,6 +4,7 @@ import com.alkl1m.deal.domain.entity.Contractor;
 import com.alkl1m.deal.domain.entity.Deal;
 import com.alkl1m.deal.domain.entity.Status;
 import com.alkl1m.deal.domain.entity.Type;
+import com.alkl1m.deal.domain.enums.ERole;
 import com.alkl1m.deal.repository.DealRepository;
 import com.alkl1m.deal.repository.StatusRepository;
 import com.alkl1m.deal.repository.TypeRepository;
@@ -25,6 +26,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,7 +59,7 @@ public class DealServiceImpl implements DealService {
      */
     @Override
     public DealsDto getDealsByParameters(DealFiltersPayload payload, Pageable pageable, UserDetailsImpl userDetails) {
-        Set<String> userRoles = getUserRoles(userDetails);
+        Set<GrantedAuthority> userRoles = getUserRoles(userDetails);
 
         validateUserRoles(payload, userRoles);
 
@@ -185,18 +187,16 @@ public class DealServiceImpl implements DealService {
         return dealRepository.save(existingDeal);
     }
 
-    private Set<String> getUserRoles(UserDetailsImpl userDetails) {
-        return userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toSet());
+    private Set<GrantedAuthority> getUserRoles(UserDetailsImpl userDetails) {
+        return new HashSet<>(userDetails.getAuthorities());
     }
 
-    private void validateUserRoles(DealFiltersPayload payload, Set<String> userRoles) {
+    private void validateUserRoles(DealFiltersPayload payload, Set<GrantedAuthority> userRoles) {
         String expectedType = null;
 
-        if (userRoles.contains("CREDIT_USER")) {
+        if (hasRole(userRoles, ERole.CREDIT_USER)) {
             expectedType = "CREDIT";
-        } else if (userRoles.contains("OVERDRAFT_USER")) {
+        } else if (hasRole(userRoles, ERole.OVERDRAFT_USER)) {
             expectedType = "OVERDRAFT";
         }
 
@@ -205,6 +205,10 @@ public class DealServiceImpl implements DealService {
                 throw new AuthenticationServiceException("Пользователь с такой ролью не может просматривать эти данные.");
             }
         }
+    }
+
+    private boolean hasRole(Set<GrantedAuthority> userRoles, ERole role) {
+        return userRoles.contains(new SimpleGrantedAuthority(role.name()));
     }
 
 }
