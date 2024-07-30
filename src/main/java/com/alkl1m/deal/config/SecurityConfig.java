@@ -1,5 +1,6 @@
 package com.alkl1m.deal.config;
 
+import com.alkl1m.deal.domain.enums.ERole;
 import com.alkl1m.deal.security.filter.JwtFilter;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -53,13 +54,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth
                                 .requestMatchers("/swagger-ui/**").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/**").hasAnyAuthority("USER", "CREDIT_USER", "OVERDRAFT_USER", "DEAL_SUPERUSER", "CONTRACTOR_RUS", "CONTRACTOR_SUPERUSER", "SUPERUSER")
-                                .requestMatchers(HttpMethod.PUT, "/**").hasAnyAuthority("DEAL_SUPERUSER", "SUPERUSER")
-                                .requestMatchers(HttpMethod.PATCH, "/**").hasAnyAuthority("DEAL_SUPERUSER", "SUPERUSER")
-                                .requestMatchers(HttpMethod.POST, "/deal/search").hasAnyAuthority("CREDIT_USER", "OVERDRAFT_USER", "DEAL_SUPERUSER", "SUPERUSER")
-                                .requestMatchers(HttpMethod.DELETE, "/**").hasAnyAuthority("DEAL_SUPERUSER", "SUPERUSER")
-                                .requestMatchers("/deal-contractor/**").hasAnyAuthority("DEAL_SUPERUSER", "SUPERUSER")
-                                .requestMatchers("/contractor-to-role/**").hasAnyAuthority("DEAL_SUPERUSER", "SUPERUSER")
+                                .requestMatchers("/**").hasAnyAuthority(ERole.USER.name(),
+                                        ERole.CREDIT_USER.name(),
+                                        ERole.OVERDRAFT_USER.name(),
+                                        ERole.DEAL_SUPERUSER.name(),
+                                        ERole.CONTRACTOR_RUS.name(),
+                                        ERole.CONTRACTOR_SUPERUSER.name(),
+                                        ERole.SUPERUSER.name())
                                 .anyRequest().authenticated());
 
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

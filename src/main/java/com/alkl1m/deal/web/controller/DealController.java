@@ -19,6 +19,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -63,6 +64,7 @@ public class DealController {
     })
     @AuditLog
     @PutMapping("/save")
+    @PreAuthorize("hasAnyAuthority('DEAL_SUPERUSER', 'SUPERUSER')")
     public ResponseEntity<DealDto> saveOrUpdateDeal(@Validated @RequestBody NewDealPayload payload,
                                                     @AuthenticationPrincipal UserDetailsImpl userDetails) {
         DealDto savedDeal = dealService.saveOrUpdate(payload, userDetails.getId());
@@ -108,6 +110,7 @@ public class DealController {
     })
     @AuditLog
     @PatchMapping("/change")
+    @PreAuthorize("hasAnyAuthority('DEAL_SUPERUSER', 'SUPERUSER')")
     public ResponseEntity<Void> changeStatus(@RequestBody ChangeStatusPayload payload,
                                              @AuthenticationPrincipal UserDetailsImpl userDetails) {
         dealService.changeStatus(payload, userDetails.getId());
@@ -135,6 +138,7 @@ public class DealController {
     })
     @AuditLog
     @PostMapping("/search")
+    @PreAuthorize("hasAnyAuthority('CREDIT_USER', 'OVERDRAFT_USER' ,'DEAL_SUPERUSER', 'SUPERUSER')")
     public ResponseEntity<DealsDto> search(
             @RequestBody DealFiltersPayload payload,
             @RequestParam(defaultValue = "0", required = false) Integer page,

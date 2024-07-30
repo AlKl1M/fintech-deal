@@ -24,7 +24,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
@@ -33,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -192,6 +192,10 @@ public class DealServiceImpl implements DealService {
     }
 
     private void validateUserRoles(DealFiltersPayload payload, Set<GrantedAuthority> userRoles) {
+        if (hasRole(userRoles, ERole.DEAL_SUPERUSER) || hasRole(userRoles, ERole.SUPERUSER)) {
+            return;
+        }
+
         String expectedType = null;
 
         if (hasRole(userRoles, ERole.CREDIT_USER)) {
@@ -201,11 +205,15 @@ public class DealServiceImpl implements DealService {
         }
 
         if (expectedType != null) {
-            if (payload.type().size() != 1 || !payload.type().get(0).getId().equals(expectedType)) {
+            if (payload.type() == null || payload.type().isEmpty()) {
+                Optional<Type> expectedTypeFromRepo = typeRepository.findById(expectedType);
+                expectedTypeFromRepo.ifPresent(type -> payload.type().add(type));
+            } else if (payload.type().size() != 1 || !payload.type().get(0).getId().equals(expectedType)) {
                 throw new AuthenticationServiceException("Пользователь с такой ролью не может просматривать эти данные.");
             }
         }
     }
+
 
     private boolean hasRole(Set<GrantedAuthority> userRoles, ERole role) {
         return userRoles.contains(new SimpleGrantedAuthority(role.name()));
