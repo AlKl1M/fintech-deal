@@ -61,7 +61,7 @@ public class DealServiceImpl implements DealService {
     public DealsDto getDealsByParameters(DealFiltersPayload payload, Pageable pageable, UserDetailsImpl userDetails) {
         Set<GrantedAuthority> userRoles = getUserRoles(userDetails);
 
-        validateUserRoles(payload, userRoles);
+        payload = validateUserRoles(payload, userRoles);
 
         Specification<Deal> spec = DealSpecifications.getDealByParameters(payload);
         Page<Deal> deals = dealRepository.findAll(spec, pageable);
@@ -191,9 +191,9 @@ public class DealServiceImpl implements DealService {
         return new HashSet<>(userDetails.getAuthorities());
     }
 
-    private void validateUserRoles(DealFiltersPayload payload, Set<GrantedAuthority> userRoles) {
+    private DealFiltersPayload validateUserRoles(DealFiltersPayload payload, Set<GrantedAuthority> userRoles) {
         if (hasRole(userRoles, ERole.DEAL_SUPERUSER) || hasRole(userRoles, ERole.SUPERUSER)) {
-            return;
+            return payload;
         }
 
         String expectedType = null;
@@ -207,11 +207,14 @@ public class DealServiceImpl implements DealService {
         if (expectedType != null) {
             if (payload.type() == null || payload.type().isEmpty()) {
                 Optional<Type> expectedTypeFromRepo = typeRepository.findById(expectedType);
-                expectedTypeFromRepo.ifPresent(type -> payload.type().add(type));
+                if (expectedTypeFromRepo.isPresent()) {
+                    return payload.withType(List.of(expectedTypeFromRepo.get()));
+                }
             } else if (payload.type().size() != 1 || !payload.type().get(0).getId().equals(expectedType)) {
                 throw new AuthenticationServiceException("Пользователь с такой ролью не может просматривать эти данные.");
             }
         }
+        return payload;
     }
 
 

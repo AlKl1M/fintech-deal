@@ -54,4 +54,7 @@ public record DealFiltersPayload(
         @Schema(description = "Фильтр по поручителям")
         ContractorFilterDto warranty
 ) {
+        public DealFiltersPayload withType(List<Type> newType) {
+                return new DealFiltersPayload(id, description, agreementNumber, agreementDateRange, availabilityDateRange, newType, status, closeDtRange, borrower, warranty);
+        }
 }
