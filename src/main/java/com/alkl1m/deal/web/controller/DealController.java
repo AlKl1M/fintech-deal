@@ -1,8 +1,8 @@
 package com.alkl1m.deal.web.controller;
 
 import com.alkl1m.auditlogspringbootautoconfigure.annotation.AuditLog;
+import com.alkl1m.authutilsspringbootautoconfigure.service.impl.UserDetailsImpl;
 import com.alkl1m.deal.service.DealService;
-import com.alkl1m.deal.service.impl.UserDetailsImpl;
 import com.alkl1m.deal.web.payload.ChangeStatusPayload;
 import com.alkl1m.deal.web.payload.DealDto;
 import com.alkl1m.deal.web.payload.DealFiltersPayload;

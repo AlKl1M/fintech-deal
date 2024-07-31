@@ -1,8 +1,8 @@
 package com.alkl1m.deal.config;
 
+import com.alkl1m.authutilsspringbootautoconfigure.security.interceptor.JwtTokenInterceptor;
+import com.alkl1m.authutilsspringbootautoconfigure.util.JwtUtils;
 import com.alkl1m.deal.client.WebClientContractorClient;
-import com.alkl1m.deal.security.interceptor.JwtTokenInterceptor;
-import com.alkl1m.deal.util.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

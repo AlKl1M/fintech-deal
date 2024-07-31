@@ -1,11 +1,10 @@
 package com.alkl1m.deal.config;
 
-import com.alkl1m.deal.domain.enums.ERole;
-import com.alkl1m.deal.security.filter.JwtFilter;
+import com.alkl1m.authutilsspringbootautoconfigure.domain.enums.ERole;
+import com.alkl1m.authutilsspringbootautoconfigure.security.filter.JwtFilter;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
