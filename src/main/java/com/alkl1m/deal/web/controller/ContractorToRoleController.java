@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -44,6 +45,7 @@ public class ContractorToRoleController {
     })
     @AuditLog
     @PostMapping("/add/{id}")
+    @PreAuthorize("hasAnyAuthority('DEAL_SUPERUSER', 'SUPERUSER')")
     public ResponseEntity<Void> addRoleToContractor(@PathVariable UUID id, @RequestParam String roleId) {
         contractorService.addRoleToContractor(id, roleId);
         return ResponseEntity.ok().build();
@@ -65,6 +67,7 @@ public class ContractorToRoleController {
     })
     @AuditLog
     @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasAnyAuthority('DEAL_SUPERUSER', 'SUPERUSER')")
     public ResponseEntity<Void> deleteRoleForContractor(@PathVariable UUID id, @RequestParam String roleId) {
         contractorService.deactivateRoleForContractor(id, roleId);
         return ResponseEntity.ok().build();

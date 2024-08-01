@@ -1,6 +1,7 @@
 package com.alkl1m.deal.web.controller;
 
 import com.alkl1m.auditlogspringbootautoconfigure.annotation.AuditLog;
+import com.alkl1m.authutilsspringbootautoconfigure.service.impl.UserDetailsImpl;
 import com.alkl1m.deal.service.DealService;
 import com.alkl1m.deal.web.payload.ChangeStatusPayload;
 import com.alkl1m.deal.web.payload.DealDto;
@@ -18,6 +19,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -61,8 +64,10 @@ public class DealController {
     })
     @AuditLog
     @PutMapping("/save")
-    public ResponseEntity<DealDto> saveOrUpdateDeal(@Validated @RequestBody NewDealPayload payload) {
-        DealDto savedDeal = dealService.saveOrUpdate(payload);
+    @PreAuthorize("hasAnyAuthority('DEAL_SUPERUSER', 'SUPERUSER')")
+    public ResponseEntity<DealDto> saveOrUpdateDeal(@Validated @RequestBody NewDealPayload payload,
+                                                    @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        DealDto savedDeal = dealService.saveOrUpdate(payload, userDetails.getId());
         return ResponseEntity.ok(savedDeal);
     }
 
@@ -105,8 +110,10 @@ public class DealController {
     })
     @AuditLog
     @PatchMapping("/change")
-    public ResponseEntity<Void> changeStatus(@RequestBody ChangeStatusPayload payload) {
-        dealService.changeStatus(payload);
+    @PreAuthorize("hasAnyAuthority('DEAL_SUPERUSER', 'SUPERUSER')")
+    public ResponseEntity<Void> changeStatus(@RequestBody ChangeStatusPayload payload,
+                                             @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        dealService.changeStatus(payload, userDetails.getId());
         return ResponseEntity.ok().build();
     }
 
@@ -114,8 +121,8 @@ public class DealController {
      * Получение сделки по заданным параметрам.
      *
      * @param payload информация о фильтрах.
-     * @param page номер страницы.
-     * @param size размер страницы.
+     * @param page    номер страницы.
+     * @param size    размер страницы.
      * @return DTO найденных сделок.
      */
     @Operation(summary = "Получение сделки по заданным параметрам", tags = "deal")
@@ -131,12 +138,16 @@ public class DealController {
     })
     @AuditLog
     @PostMapping("/search")
+    @PreAuthorize("hasAnyAuthority('CREDIT_USER', 'OVERDRAFT_USER' ,'DEAL_SUPERUSER', 'SUPERUSER')")
     public ResponseEntity<DealsDto> search(
             @RequestBody DealFiltersPayload payload,
             @RequestParam(defaultValue = "0", required = false) Integer page,
-            @RequestParam(defaultValue = "10", required = false) Integer size) {
+            @RequestParam(defaultValue = "10", required = false) Integer size,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+
         Pageable paging = PageRequest.of(page, size);
-        return ResponseEntity.ok(dealService.getDealsByParameters(payload, paging));
+        return ResponseEntity.ok(dealService.getDealsByParameters(payload, paging, userDetails));
     }
 
 }

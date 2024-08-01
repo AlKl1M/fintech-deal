@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,6 +54,7 @@ public class ContractorController {
     })
     @AuditLog
     @PutMapping("/save")
+    @PreAuthorize("hasAnyAuthority('DEAL_SUPERUSER', 'SUPERUSER')")
     public ResponseEntity<ContractorDto> saveOrUpdateContractor(@Validated @RequestBody NewContractorPayload payload) {
         return ResponseEntity.ok(contractorService.saveOrUpdate(payload));
     }
@@ -72,6 +74,7 @@ public class ContractorController {
     })
     @AuditLog
     @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasAnyAuthority('DEAL_SUPERUSER', 'SUPERUSER')")
     public ResponseEntity<Void> deleteContractor(@PathVariable UUID id) {
         contractorService.deleteContractorById(id);
         return ResponseEntity.ok().build();
