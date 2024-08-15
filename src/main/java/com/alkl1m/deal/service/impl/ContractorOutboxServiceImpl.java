@@ -50,7 +50,12 @@ public class ContractorOutboxServiceImpl implements ContractorOutboxService {
                 PageRequest.of(0, limit, Sort.by("createdDate").ascending())
         );
 
-        batch.forEach(eventBusService::publishContractor);
+        for (ContractorOutbox contractorOutbox : batch) {
+            eventBusService.publishContractor(contractorOutbox);
+            contractorOutbox.setStatus(ContractorOutboxStatus.DONE);
+            outboxRepository.save(contractorOutbox);
+        }
+
     }
 
     private ContractorOutbox createContractorOutbox(boolean isMain, String contractorId) {
