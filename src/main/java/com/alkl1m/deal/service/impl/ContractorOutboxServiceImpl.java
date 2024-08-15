@@ -34,8 +34,8 @@ public class ContractorOutboxServiceImpl implements ContractorOutboxService {
      * @param contractorId уникальный идентификатор контрагента.
      */
     @Override
-    public void save(boolean mainBorrower, String contractorId) {
-        outboxRepository.save(createContractorOutbox(mainBorrower, contractorId));
+    public ContractorOutbox save(boolean mainBorrower, String contractorId) {
+        return outboxRepository.save(createContractorOutbox(mainBorrower, contractorId));
     }
 
     /**

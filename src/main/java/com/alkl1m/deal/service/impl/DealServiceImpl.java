@@ -3,15 +3,19 @@ package com.alkl1m.deal.service.impl;
 import com.alkl1m.authutilsspringbootautoconfigure.domain.enums.ERole;
 import com.alkl1m.authutilsspringbootautoconfigure.service.impl.UserDetailsImpl;
 import com.alkl1m.deal.domain.entity.Contractor;
+import com.alkl1m.deal.domain.entity.ContractorOutbox;
 import com.alkl1m.deal.domain.entity.Deal;
 import com.alkl1m.deal.domain.entity.Status;
 import com.alkl1m.deal.domain.entity.Type;
+import com.alkl1m.deal.domain.enums.ContractorOutboxStatus;
+import com.alkl1m.deal.repository.ContractorOutboxRepository;
 import com.alkl1m.deal.repository.DealRepository;
 import com.alkl1m.deal.repository.StatusRepository;
 import com.alkl1m.deal.repository.TypeRepository;
 import com.alkl1m.deal.repository.spec.DealSpecifications;
 import com.alkl1m.deal.service.ContractorOutboxService;
 import com.alkl1m.deal.service.DealService;
+import com.alkl1m.deal.service.EventBusService;
 import com.alkl1m.deal.web.payload.ChangeStatusPayload;
 import com.alkl1m.deal.web.payload.ContractorDto;
 import com.alkl1m.deal.web.payload.DealDto;
@@ -50,6 +54,8 @@ public class DealServiceImpl implements DealService {
     private final TypeRepository typeRepository;
     private final ContractorOutboxService outboxService;
     private final StatusRepository statusRepository;
+    private final EventBusService eventBusService;
+    private final ContractorOutboxRepository outboxRepository;
 
     /**
      * Метод getDealsByParameters возвращает список сделок в соответствии с переданными параметрами и пагинацией.
@@ -154,7 +160,15 @@ public class DealServiceImpl implements DealService {
     private void processDealStatusChange(Deal deal, Status status, boolean isActiveToActive, String contractorId, String userId) {
         deal.setStatus(status);
         dealRepository.save(deal);
-        outboxService.save(isActiveToActive, contractorId);
+        ContractorOutbox savedOutbox = outboxService.save(isActiveToActive, contractorId);
+
+        try {
+            eventBusService.publishContractor(savedOutbox);
+            savedOutbox.setStatus(ContractorOutboxStatus.DONE);
+            outboxRepository.save(savedOutbox);
+        } catch (Exception e) {
+            System.out.println(2);
+        }
     }
 
     private Deal createNewDeal(NewDealPayload payload, String userId) {

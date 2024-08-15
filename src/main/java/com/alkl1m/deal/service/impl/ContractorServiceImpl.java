@@ -1,12 +1,16 @@
 package com.alkl1m.deal.service.impl;
 
 import com.alkl1m.deal.domain.entity.Contractor;
+import com.alkl1m.deal.domain.entity.ContractorOutbox;
 import com.alkl1m.deal.domain.entity.Role;
+import com.alkl1m.deal.domain.enums.ContractorOutboxStatus;
+import com.alkl1m.deal.repository.ContractorOutboxRepository;
 import com.alkl1m.deal.repository.ContractorRepository;
 import com.alkl1m.deal.repository.DealRepository;
 import com.alkl1m.deal.repository.RoleRepository;
 import com.alkl1m.deal.service.ContractorOutboxService;
 import com.alkl1m.deal.service.ContractorService;
+import com.alkl1m.deal.service.EventBusService;
 import com.alkl1m.deal.web.payload.ContractorDto;
 import com.alkl1m.deal.web.payload.NewContractorPayload;
 import jakarta.persistence.EntityNotFoundException;
@@ -31,6 +35,8 @@ public class ContractorServiceImpl implements ContractorService {
     private final ContractorRepository contractorRepository;
     private final RoleRepository roleRepository;
     private final ContractorOutboxService outboxService;
+    private final EventBusService eventBusService;
+    private final ContractorOutboxRepository outboxRepository;
     private static final String DEFAULT_USER_ID = "1";
 
     /**
@@ -74,7 +80,15 @@ public class ContractorServiceImpl implements ContractorService {
         contractor.setActive(false);
 
         if (canDelete) {
-            outboxService.save(false, contractor.getContractorId());
+            ContractorOutbox savedOutbox = outboxService.save(false, contractor.getContractorId());
+
+            try {
+                eventBusService.publishContractor(savedOutbox);
+                savedOutbox.setStatus(ContractorOutboxStatus.DONE);
+                outboxRepository.save(savedOutbox);
+            } catch (Exception e) {
+                System.out.println(2);
+            }
         }
 
         contractorRepository.save(contractor);
