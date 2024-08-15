@@ -7,6 +7,6 @@ import org.springframework.stereotype.Service;
 @Service
 public interface EventBusService {
 
-    ResponseEntity<Void> publishContractor(ContractorOutbox contractorOutbox);
+    void publishContractor(ContractorOutbox contractorOutbox);
 
 }

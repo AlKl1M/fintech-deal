@@ -2,12 +2,7 @@ application-version: 0.0.1-SNAPSHOT
 application-description: Deal rest api
 
 server:
-  port: 8080
-
-
-services:
-  contractor:
-    uri: http://localhost:8081
+  port: 8089
 
 spring:
   jpa:
@@ -45,7 +40,15 @@ spring:
             threadCount: 10
             threadsInheritContextClassLoaderOfInitializingThread: true
     auto-startup: false
+  rabbitmq:
+    host: localhost
+    virtual-host: vhost
+    password: 1234
+    username: rab
 deal:
+  contractorQueue: main-borrower.queue
+  contractorExchange: contractor-exchange
+  contractorRoutingKey: contractor-routing-key
   outbox:
     batchSize: 10
   schedule:

@@ -50,11 +50,7 @@ public class ContractorOutboxServiceImpl implements ContractorOutboxService {
                 PageRequest.of(0, limit, Sort.by("createdDate").ascending())
         );
 
-        batch.forEach(contractorOutbox -> {
-            if (eventBusService.publishContractor(contractorOutbox).getStatusCode().is2xxSuccessful()) {
-                contractorOutbox.setStatus(ContractorOutboxStatus.DONE);
-            }
-        });
+        batch.forEach(eventBusService::publishContractor);
     }
 
     private ContractorOutbox createContractorOutbox(boolean isMain, String contractorId) {
