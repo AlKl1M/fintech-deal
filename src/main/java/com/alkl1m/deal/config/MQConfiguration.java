@@ -11,7 +11,6 @@ import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFacto
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainerFactoryConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,12 +18,9 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 @Configuration
 public class MQConfiguration {
-    @Value("${deal.contractorQueue}")
-    private String queueName;
-    @Value("${deal.contractorExchange}")
-    private String exchangeName;
-    @Value("${deal.contractorRoutingKey}")
-    private String contractorRoutingKey;
+    public static final String UPDATE_MAIN_BORROWER = "deals_update_main_borrower_queue";
+    public static final String EXCHANGE_MESSAGES = "deals_update_main_borrower_exchange";
+    public static final String MAIN_BORROWER_ROUTING_KEY = "deals_update_main_borrower_routing_key";
 
     @Bean
     RabbitTemplate amqpTemplate(ConnectionFactory connectionFactory, Jackson2ObjectMapperBuilder builder) {
@@ -36,9 +32,9 @@ public class MQConfiguration {
 
     @Bean
     public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(ConnectionFactory connectionFactory,
-                                                                               SimpleRabbitListenerContainerFactoryConfigurer containerFactoryConfigurer) {
+                                                                               SimpleRabbitListenerContainerFactoryConfigurer configurer) {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
-        containerFactoryConfigurer.configure(factory, connectionFactory);
+        configurer.configure(factory, connectionFactory);
         return factory;
     }
 
@@ -50,18 +46,17 @@ public class MQConfiguration {
 
     @Bean
     Queue mainBorrowerQueue() {
-        return QueueBuilder.durable(queueName)
+        return QueueBuilder.durable(UPDATE_MAIN_BORROWER)
                 .build();
     }
 
     @Bean
-    DirectExchange contractorExchange() {
-        return new DirectExchange(exchangeName);
+    DirectExchange mainBorrowerExchange() {
+        return new DirectExchange(EXCHANGE_MESSAGES);
     }
 
     @Bean
-    Binding orderBinding(Queue mainBorrowerQueue, DirectExchange contractorExchange) {
-        return BindingBuilder.bind(mainBorrowerQueue).to(contractorExchange).with(contractorRoutingKey);
+    Binding mainBorrowerBinding() {
+        return BindingBuilder.bind(mainBorrowerQueue()).to(mainBorrowerExchange()).with(MAIN_BORROWER_ROUTING_KEY);
     }
-
 }

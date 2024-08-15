@@ -46,9 +46,6 @@ spring:
     password: 1234
     username: rab
 deal:
-  contractorQueue: main-borrower.queue
-  contractorExchange: contractor-exchange
-  contractorRoutingKey: contractor-routing-key
   outbox:
     batchSize: 10
   schedule:

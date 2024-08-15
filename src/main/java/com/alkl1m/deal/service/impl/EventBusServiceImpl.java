@@ -1,7 +1,7 @@
 package com.alkl1m.deal.service.impl;
 
 import com.alkl1m.deal.domain.entity.ContractorOutbox;
-import com.alkl1m.deal.rabbitmq.ContractorProducer;
+import com.alkl1m.deal.rabbitmq.MainBorrowerProducer;
 import com.alkl1m.deal.service.EventBusService;
 import com.alkl1m.deal.web.payload.MainBorrowerRequest;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class EventBusServiceImpl implements EventBusService {
 
-    private final ContractorProducer producer;
+    private final MainBorrowerProducer producer;
 
     /**
      * Метод publishContractor публикует информацию о контрагенте через шину событий.
