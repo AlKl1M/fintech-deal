@@ -22,7 +22,10 @@ public class MQConfiguration {
     public static final String EXCHANGE_MESSAGES = "deals_update_main_borrower_exchange";
     public static final String MAIN_BORROWER_ROUTING_KEY = "deals_update_main_borrower_routing_key";
 
+    public static final String CONTRACTORS_EXCHANGE = "contractors_contractor_exchange";
+
     public static final String DEAL_CONTRACTOR_QUEUE = "deals_contractor_queue";
+    public static final String DLX_EXCHANGE_MESSAGES = "deals_dead_contractor_exchange";
 
     @Bean
     RabbitTemplate amqpTemplate(ConnectionFactory connectionFactory, Jackson2ObjectMapperBuilder builder) {
@@ -53,6 +56,18 @@ public class MQConfiguration {
     }
 
     @Bean
+    DirectExchange contractorExchange() {
+        return new DirectExchange(CONTRACTORS_EXCHANGE);
+    }
+
+    @Bean
+    Queue contractorQueue() {
+        return QueueBuilder.durable(DEAL_CONTRACTOR_QUEUE)
+                .withArgument("x-dead-letter-exchange", DLX_EXCHANGE_MESSAGES)
+                .build();
+    }
+
+    @Bean
     DirectExchange mainBorrowerExchange() {
         return new DirectExchange(EXCHANGE_MESSAGES);
     }
@@ -60,5 +75,10 @@ public class MQConfiguration {
     @Bean
     Binding mainBorrowerBinding() {
         return BindingBuilder.bind(mainBorrowerQueue()).to(mainBorrowerExchange()).with(MAIN_BORROWER_ROUTING_KEY);
+    }
+
+    @Bean
+    Binding bindingMessages() {
+        return BindingBuilder.bind(contractorQueue()).to(contractorExchange()).with(DEAL_CONTRACTOR_QUEUE);
     }
 }

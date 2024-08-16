@@ -7,10 +7,8 @@ import com.alkl1m.deal.web.payload.UpdateContractorMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
@@ -41,7 +39,7 @@ public class ContractorConsumer {
     private void updateContractor(Contractor contractor, UpdateContractorMessage msg, ZonedDateTime modifyDateTime) {
         contractor.setName(msg.name());
         contractor.setInn(msg.inn());
-        contractor.setModifyDate(modifyDateTime); // Сохраняем ZonedDateTime
+        contractor.setModifyDate(modifyDateTime);
         contractor.setModifyUserId(msg.modifyUser());
     }
 }
