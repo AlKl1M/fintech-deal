@@ -22,6 +22,8 @@ public class MQConfiguration {
     public static final String EXCHANGE_MESSAGES = "deals_update_main_borrower_exchange";
     public static final String MAIN_BORROWER_ROUTING_KEY = "deals_update_main_borrower_routing_key";
 
+    public static final String DEAL_CONTRACTOR_QUEUE = "deals_contractor_queue";
+
     @Bean
     RabbitTemplate amqpTemplate(ConnectionFactory connectionFactory, Jackson2ObjectMapperBuilder builder) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
