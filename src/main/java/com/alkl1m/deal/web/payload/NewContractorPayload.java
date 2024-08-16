@@ -5,6 +5,7 @@ import com.alkl1m.deal.domain.entity.Role;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.Set;
 import java.util.UUID;
 
@@ -53,7 +54,7 @@ public record NewContractorPayload(
                 .inn(payload.inn)
                 .main(payload.main)
                 .roles(payload.roles)
-                .createDate(LocalDate.now())
+                .createDate(ZonedDateTime.now())
                 .createUserId(userId)
                 .isActive(true)
                 .build();

@@ -11,6 +11,8 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 
@@ -24,9 +26,10 @@ public class ContractorConsumer {
         try {
             Optional<Contractor> contractorOpt = contractorRepository.findByContractorId(msg.id());
             contractorOpt.ifPresent(existingContractor -> {
-                LocalDate modifyDate = LocalDate.parse(msg.modifyDate());
-                if (existingContractor.getModifyDate() == null || modifyDate.isBefore(existingContractor.getModifyDate())) {
-                    updateContractor(existingContractor, msg, modifyDate);
+                ZonedDateTime modifyDateTime = ZonedDateTime.parse(msg.modifyDate(), DateTimeFormatter.ISO_ZONED_DATE_TIME);
+
+                if (existingContractor.getModifyDate() == null || modifyDateTime.isAfter(existingContractor.getModifyDate())) {
+                    updateContractor(existingContractor, msg, modifyDateTime);
                     contractorRepository.save(existingContractor);
                 }
             });
@@ -35,10 +38,10 @@ public class ContractorConsumer {
         }
     }
 
-    private void updateContractor(Contractor contractor, UpdateContractorMessage msg, LocalDate modifyDate) {
+    private void updateContractor(Contractor contractor, UpdateContractorMessage msg, ZonedDateTime modifyDateTime) {
         contractor.setName(msg.name());
         contractor.setInn(msg.inn());
-        contractor.setModifyDate(modifyDate);
+        contractor.setModifyDate(modifyDateTime); // Сохраняем ZonedDateTime
         contractor.setModifyUserId(msg.modifyUser());
     }
 }

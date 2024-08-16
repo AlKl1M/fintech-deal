@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -139,7 +140,7 @@ public class ContractorServiceImpl implements ContractorService {
         existingContractor.setName(payload.name());
         existingContractor.setInn(payload.inn());
         existingContractor.setMain(payload.main());
-        existingContractor.setModifyDate(LocalDate.now());
+        existingContractor.setModifyDate(ZonedDateTime.now());
         existingContractor.setModifyUserId(DEFAULT_USER_ID);
         return contractorRepository.save(existingContractor);
     }
