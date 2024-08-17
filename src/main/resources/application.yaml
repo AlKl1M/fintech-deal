@@ -42,9 +42,10 @@ spring:
     auto-startup: false
   rabbitmq:
     host: localhost
-    virtual-host: vhost
     password: 1234
     username: rab
+    virtual-host: vhost
+    millisToResend: 100000
 deal:
   outbox:
     batchSize: 10

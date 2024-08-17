@@ -12,6 +12,7 @@ public class MainBorrowerProducer {
     private final RabbitTemplate rabbitTemplate;
 
     public void sendMessage(MainBorrowerRequest msg) {
-        rabbitTemplate.convertAndSend(MQConfiguration.EXCHANGE_MESSAGES, MQConfiguration.MAIN_BORROWER_ROUTING_KEY, msg);
+        rabbitTemplate.convertAndSend(MQConfiguration.UPDATE_MAIN_BORROWER_EXC, MQConfiguration.UPDATE_MAIN_BORROWER_ROUTING_KEY, msg);
     }
+
 }

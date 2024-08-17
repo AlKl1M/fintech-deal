@@ -19,7 +19,7 @@ import java.util.Optional;
 public class ContractorConsumer {
     private final ContractorRepository contractorRepository;
 
-    @RabbitListener(queues = MQConfiguration.DEAL_CONTRACTOR_QUEUE)
+    @RabbitListener(id = MQConfiguration.DEAL_CONTRACTOR_QUEUE, queues = MQConfiguration.DEAL_CONTRACTOR_QUEUE)
     public void receiveMessage(UpdateContractorMessage msg) {
         try {
             Optional<Contractor> contractorOpt = contractorRepository.findByContractorId(msg.id());
