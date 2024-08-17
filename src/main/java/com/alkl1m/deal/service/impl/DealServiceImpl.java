@@ -161,14 +161,9 @@ public class DealServiceImpl implements DealService {
         deal.setStatus(status);
         dealRepository.save(deal);
         ContractorOutbox savedOutbox = outboxService.save(isActiveToActive, contractorId);
-
-        try {
-            eventBusService.publishContractor(savedOutbox);
-            savedOutbox.setStatus(ContractorOutboxStatus.DONE);
-            outboxRepository.save(savedOutbox);
-        } catch (Exception e) {
-            System.out.println(2);
-        }
+        eventBusService.publishContractor(savedOutbox);
+        savedOutbox.setStatus(ContractorOutboxStatus.DONE);
+        outboxRepository.save(savedOutbox);
     }
 
     private Deal createNewDeal(NewDealPayload payload, String userId) {

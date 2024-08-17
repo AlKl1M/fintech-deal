@@ -29,6 +29,7 @@ public class MQConfiguration {
     public static final String DEAL_CONTRACTOR_QUEUE = "deals_contractor_queue";
     public static final String DEAL_CONTRACTOR_DLQ = "deals_dead_contractor_queue";
     public static final String DLX_EXCHANGE_MESSAGES = "deals_dead_contractor_exchange";
+    public static final String UNDELIVERED_MESSAGES = "undelivered_queue";
 
     @Value("${spring.rabbitmq.millisToResend}")
     private int millisToResend;
@@ -77,6 +78,12 @@ public class MQConfiguration {
     }
 
     @Bean
+    Queue undeliveredQueue() {
+        return QueueBuilder.durable(UNDELIVERED_MESSAGES)
+                .build();
+    }
+
+    @Bean
     DirectExchange mainBorrowerExchange() {
         return new DirectExchange(UPDATE_MAIN_BORROWER_EXC);
     }
@@ -100,10 +107,14 @@ public class MQConfiguration {
     Binding bindingMessages() {
         return BindingBuilder.bind(contractorQueue()).to(contractorExchange()).with(DEAL_CONTRACTOR_QUEUE);
     }
-
     @Bean
     Binding deadLetterBinding() {
         return BindingBuilder.bind(deadLetterQueue()).to(deadLetterExchange());
+    }
+
+    @Bean
+    Binding undeliveredBinding() {
+        return BindingBuilder.bind(undeliveredQueue()).to(contractorExchange()).with(UNDELIVERED_MESSAGES);
     }
 
 }
