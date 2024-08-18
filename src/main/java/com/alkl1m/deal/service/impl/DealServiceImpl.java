@@ -147,9 +147,9 @@ public class DealServiceImpl implements DealService {
 
         if (mainContractor != null && dealRepository.checkIfDealExists(mainContractor.getContractorId()) <= 1) {
             if (deal.getStatus().getId().equals("DRAFT") && status.getId().equals("ACTIVE")) {
-                processDealStatusChange(deal, status, true, mainContractor.getContractorId(), userId);
+                processDealStatusChange(deal, status, true, mainContractor.getContractorId());
             } else if (deal.getStatus().getId().equals("ACTIVE") && status.getId().equals("CLOSED")) {
-                processDealStatusChange(deal, status, false, mainContractor.getContractorId(), userId);
+                processDealStatusChange(deal, status, false, mainContractor.getContractorId());
             }
         } else {
             deal.setStatus(status);
@@ -157,7 +157,7 @@ public class DealServiceImpl implements DealService {
         }
     }
 
-    private void processDealStatusChange(Deal deal, Status status, boolean isActiveToActive, String contractorId, String userId) {
+    private void processDealStatusChange(Deal deal, Status status, boolean isActiveToActive, String contractorId) {
         deal.setStatus(status);
         dealRepository.save(deal);
         ContractorOutbox savedOutbox = outboxService.save(isActiveToActive, contractorId);

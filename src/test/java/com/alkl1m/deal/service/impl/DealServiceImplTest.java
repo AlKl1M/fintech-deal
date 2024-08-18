@@ -60,7 +60,7 @@ class DealServiceImplTest {
         Optional<ContractorOutbox> outbox = outboxRepository.findContractorOutboxByContractorId("123456789012");
 
         assertNotNull(outbox.get());
-        assertEquals(outbox.get().getStatus(), ContractorOutboxStatus.DONE);
+        assertEquals(ContractorOutboxStatus.DONE, outbox.get().getStatus());
     }
 
 }

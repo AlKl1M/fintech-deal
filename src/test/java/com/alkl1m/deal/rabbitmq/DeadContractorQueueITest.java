@@ -94,7 +94,7 @@ public class DeadContractorQueueITest {
 
         Thread.sleep(10000);
 
-        assertEquals(rabbitAdmin.getQueueInfo(MQConfiguration.DEALS_CONTRACTOR_NEW_DATA_QUEUE).getMessageCount(), 1);
-        assertEquals(rabbitAdmin.getQueueInfo(MQConfiguration.DEALS_CONTRACTOR_DLQ).getMessageCount(), 0);
+        assertEquals(1, rabbitAdmin.getQueueInfo(MQConfiguration.DEALS_CONTRACTOR_NEW_DATA_QUEUE).getMessageCount());
+        assertEquals(0, rabbitAdmin.getQueueInfo(MQConfiguration.DEALS_CONTRACTOR_DLQ).getMessageCount());
     }
 }

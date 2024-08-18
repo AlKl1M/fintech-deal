@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Testcontainers
 @SpringBootTest
-public class UndeliveredQueueITest {
+class UndeliveredQueueITest {
 
     @Container
     static RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:3-management")
@@ -90,7 +90,7 @@ public class UndeliveredQueueITest {
         });
         Thread.sleep(5000);
 
-        assertEquals(rabbitAdmin.getQueueInfo(MQConfiguration.DEALS_CONTRACTOR_UNDELIVERED_QUEUE).getMessageCount(), 1);
+        assertEquals(1, rabbitAdmin.getQueueInfo(MQConfiguration.DEALS_CONTRACTOR_UNDELIVERED_QUEUE).getMessageCount());
 
     }
 
