@@ -23,7 +23,9 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
 @Testcontainers
 @SpringBootTest
@@ -70,7 +72,7 @@ public class DeadContractorQueueITest {
 
     @Test
     @Sql("/sql/contractors.sql")
-    void testDeadQueue_withValidMessage_willResendToDealContractorQueue() throws InterruptedException {
+    void testDeadQueue_withValidMessage_willResendToDealContractorQueue() {
         registry.stop();
         UpdateContractorMessage message = new UpdateContractorMessage("123456789012", "newName", "111111111", ZonedDateTime.now().toString(), "1");
         rabbitTemplate.convertAndSend(MQConfiguration.DEALS_CONTRACTOR_DLX, MQConfiguration.DEALS_CONTRACTOR_NEW_DATA_QUEUE, message, m -> {
@@ -92,9 +94,9 @@ public class DeadContractorQueueITest {
             return m;
         });
 
-        Thread.sleep(10000);
-
-        assertEquals(1, rabbitAdmin.getQueueInfo(MQConfiguration.DEALS_CONTRACTOR_NEW_DATA_QUEUE).getMessageCount());
-        assertEquals(0, rabbitAdmin.getQueueInfo(MQConfiguration.DEALS_CONTRACTOR_DLQ).getMessageCount());
+        await().atMost(10, SECONDS).untilAsserted(() -> {
+            assertEquals(1, rabbitAdmin.getQueueInfo(MQConfiguration.DEALS_CONTRACTOR_NEW_DATA_QUEUE).getMessageCount());
+            assertEquals(0, rabbitAdmin.getQueueInfo(MQConfiguration.DEALS_CONTRACTOR_DLQ).getMessageCount());
+        });
     }
 }

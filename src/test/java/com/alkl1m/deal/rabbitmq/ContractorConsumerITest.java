@@ -129,19 +129,18 @@ class ContractorConsumerITest {
 
     @Test
     @Sql("/sql/contractors.sql")
-    void testReceiveMessage_withInvalidData_ThrowsExceptionAndGoesToDLQ() throws InterruptedException {
+    void testReceiveMessage_withInvalidData_ThrowsExceptionAndGoesToDLQ() {
         UpdateContractorMessage message = new UpdateContractorMessage("123456789012", "newName", "111111111", "WRONG DATE", "1");
 
         rabbitTemplate.convertAndSend(MQConfiguration.DEALS_CONTRACTOR_NEW_DATA_QUEUE, message);
 
-        Thread.sleep(5000);
-
-        UpdateContractorMessage receivedMessage = (UpdateContractorMessage) rabbitTemplate.receiveAndConvert(MQConfiguration.DEALS_CONTRACTOR_DLQ);
-
-        assertNotNull(receivedMessage);
-        assertEquals(receivedMessage.id(), message.id());
-        assertEquals(receivedMessage.name(), message.name());
-        assertEquals(receivedMessage.inn(), message.inn());
+        await().atMost(10, SECONDS).untilAsserted(() -> {
+            UpdateContractorMessage receivedMessage = (UpdateContractorMessage) rabbitTemplate.receiveAndConvert(MQConfiguration.DEALS_CONTRACTOR_DLQ);
+            assertNotNull(receivedMessage);
+            assertEquals(receivedMessage.id(), message.id());
+            assertEquals(receivedMessage.name(), message.name());
+            assertEquals(receivedMessage.inn(), message.inn());
+        });
     }
 
 }

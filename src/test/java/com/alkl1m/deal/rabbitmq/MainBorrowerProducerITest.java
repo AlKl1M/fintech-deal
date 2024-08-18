@@ -14,7 +14,9 @@ import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
 @Testcontainers
 @SpringBootTest
@@ -50,18 +52,17 @@ class MainBorrowerProducerITest {
     RabbitAdmin rabbitAdmin;
 
     @Test
-    void testSendMessage_withValidPayload_returnsValidData() throws InterruptedException {
+    void testSendMessage_withValidPayload_returnsValidData() {
 
         MainBorrowerRequest request = new MainBorrowerRequest("1", true);
         mainBorrowerProducer.sendMessage(request);
 
-        Thread.sleep(5000);
-
-        MainBorrowerRequest receivedMessage = (MainBorrowerRequest) rabbitTemplate.receiveAndConvert(MQConfiguration.CONTRACTOR_UPDATE_MAIN_BORROWER_QUEUE);
-
-        assertThat(receivedMessage).isNotNull();
-        assertThat(receivedMessage.contractorId()).isEqualTo("1");
-        assertThat(receivedMessage.main()).isTrue();
+        await().atMost(10, SECONDS).untilAsserted(() -> {
+            MainBorrowerRequest receivedMessage = (MainBorrowerRequest) rabbitTemplate.receiveAndConvert(MQConfiguration.CONTRACTOR_UPDATE_MAIN_BORROWER_QUEUE);
+            assertThat(receivedMessage).isNotNull();
+            assertThat(receivedMessage.contractorId()).isEqualTo("1");
+            assertThat(receivedMessage.main()).isTrue();
+        });
     }
 
 }

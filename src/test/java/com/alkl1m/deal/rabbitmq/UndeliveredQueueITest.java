@@ -22,7 +22,9 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
 @Testcontainers
 @SpringBootTest
@@ -69,7 +71,7 @@ class UndeliveredQueueITest {
     }
 
     @Test
-    void testSendMessage_withDeadMessageMaxRetries_willGoToUndeliveredQueue() throws InterruptedException {
+    void testSendMessage_withDeadMessageMaxRetries_willGoToUndeliveredQueue() {
         UpdateContractorMessage message = new UpdateContractorMessage("123456789012", "newName", "111111111", ZonedDateTime.now().toString(), "1");
         rabbitTemplate.convertAndSend(MQConfiguration.DEALS_CONTRACTOR_DLX, MQConfiguration.DEALS_CONTRACTOR_NEW_DATA_QUEUE, message, m -> {
             Map<String, Object> xDeath = new HashMap<>();
@@ -88,10 +90,10 @@ class UndeliveredQueueITest {
             m.getMessageProperties().getHeaders().put("x-last-death-reason", "rejected");
             return m;
         });
-        Thread.sleep(5000);
 
-        assertEquals(1, rabbitAdmin.getQueueInfo(MQConfiguration.DEALS_CONTRACTOR_UNDELIVERED_QUEUE).getMessageCount());
-
+        await().atMost(10, SECONDS).untilAsserted(() -> {
+            assertEquals(1, rabbitAdmin.getQueueInfo(MQConfiguration.DEALS_CONTRACTOR_UNDELIVERED_QUEUE).getMessageCount());
+        });
     }
 
 }
