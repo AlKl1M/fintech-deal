@@ -82,14 +82,9 @@ public class ContractorServiceImpl implements ContractorService {
 
         if (canDelete) {
             ContractorOutbox savedOutbox = outboxService.save(false, contractor.getContractorId());
-
-            try {
-                eventBusService.publishContractor(savedOutbox);
-                savedOutbox.setStatus(ContractorOutboxStatus.DONE);
-                outboxRepository.save(savedOutbox);
-            } catch (Exception e) {
-                System.out.println(2);
-            }
+            eventBusService.publishContractor(savedOutbox);
+            savedOutbox.setStatus(ContractorOutboxStatus.DONE);
+            outboxRepository.save(savedOutbox);
         }
 
         contractorRepository.save(contractor);

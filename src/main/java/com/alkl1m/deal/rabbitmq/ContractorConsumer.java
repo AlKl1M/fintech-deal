@@ -15,8 +15,6 @@ import org.springframework.stereotype.Component;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
-import java.util.Optional;
-
 
 @Component
 @RequiredArgsConstructor
@@ -27,7 +25,7 @@ public class ContractorConsumer {
     @Value("${spring.rabbitmq.retryCount}")
     private Long retryCount;
 
-    @RabbitListener(id = MQConfiguration.DEAL_CONTRACTOR_QUEUE, queues = MQConfiguration.DEAL_CONTRACTOR_QUEUE)
+    @RabbitListener(id = MQConfiguration.DEALS_CONTRACTOR_NEW_DATA_QUEUE, queues = MQConfiguration.DEALS_CONTRACTOR_NEW_DATA_QUEUE)
     public void receiveMessage(UpdateContractorMessage msg, @Header(required = false, name = "x-death") Map<String, ?> xDeath) {
         if (checkRetryCount(xDeath)) {
             sendToUndelivered(msg);
@@ -47,7 +45,7 @@ public class ContractorConsumer {
     }
 
     private void sendToUndelivered(UpdateContractorMessage msg) {
-        rabbitTemplate.convertAndSend(MQConfiguration.UNDELIVERED_MESSAGES, msg);
+        rabbitTemplate.convertAndSend(MQConfiguration.DEALS_CONTRACTOR_UNDELIVERED_QUEUE, msg);
     }
 
     private boolean isUpdateRequired(Contractor contractor, UpdateContractorMessage msg) {

@@ -47,6 +47,7 @@ spring:
     virtual-host: vhost
     millisToResend: 300000
     retryCount: 3
+
 deal:
   outbox:
     batchSize: 10
