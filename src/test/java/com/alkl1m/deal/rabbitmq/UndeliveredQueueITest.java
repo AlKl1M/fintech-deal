@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.jdbc.Sql;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -27,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Testcontainers
 @SpringBootTest
-public class DeadContractorQueueITest {
+public class UndeliveredQueueITest {
 
     @Container
     static RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:3-management")
@@ -48,6 +47,7 @@ public class DeadContractorQueueITest {
         registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
         registry.add("spring.datasource.driver-class-name", postgreSQLContainer::getDriverClassName);
         registry.add("spring.rabbitmq.millisToResend", () -> 3000);
+        registry.add("spring.rabbitmq.retryCount", () -> 0);
     }
 
     @Autowired
@@ -69,9 +69,7 @@ public class DeadContractorQueueITest {
     }
 
     @Test
-    @Sql("/sql/contractors.sql")
-    void testDeadQueue_withValidMessage_willResendToDealContractorQueue() throws InterruptedException {
-        registry.stop();
+    void testSendMessage_withDeadMessageMaxRetries_willGoToUndeliveredQueue() throws InterruptedException {
         UpdateContractorMessage message = new UpdateContractorMessage("123456789012", "newName", "111111111", ZonedDateTime.now().toString(), "1");
         rabbitTemplate.convertAndSend(MQConfiguration.DEALS_CONTRACTOR_DLX, MQConfiguration.DEALS_CONTRACTOR_NEW_DATA_QUEUE, message, m -> {
             Map<String, Object> xDeath = new HashMap<>();
@@ -82,7 +80,6 @@ public class DeadContractorQueueITest {
             xDeath.put("routing-keys", "deals_contractor_queue");
             xDeath.put("time", System.currentTimeMillis() / 1000);
             m.getMessageProperties().getHeaders().put("x-death", xDeath);
-
             m.getMessageProperties().getHeaders().put("x-first-death-exchange", "contractors_contractor_exchange");
             m.getMessageProperties().getHeaders().put("x-first-death-queue", "deals_contractor_queue");
             m.getMessageProperties().getHeaders().put("x-first-death-reason", "rejected");
@@ -91,10 +88,10 @@ public class DeadContractorQueueITest {
             m.getMessageProperties().getHeaders().put("x-last-death-reason", "rejected");
             return m;
         });
+        Thread.sleep(5000);
 
-        Thread.sleep(10000);
+        assertEquals(rabbitAdmin.getQueueInfo(MQConfiguration.DEALS_CONTRACTOR_UNDELIVERED_QUEUE).getMessageCount(), 1);
 
-        assertEquals(rabbitAdmin.getQueueInfo(MQConfiguration.DEALS_CONTRACTOR_NEW_DATA_QUEUE).getMessageCount(), 1);
-        assertEquals(rabbitAdmin.getQueueInfo(MQConfiguration.DEALS_CONTRACTOR_DLQ).getMessageCount(), 0);
     }
+
 }

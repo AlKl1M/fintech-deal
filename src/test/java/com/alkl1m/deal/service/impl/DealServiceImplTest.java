@@ -1,24 +1,29 @@
-package com.alkl1m.deal.rabbitmq;
+package com.alkl1m.deal.service.impl;
 
-import com.alkl1m.deal.config.MQConfiguration;
-import com.alkl1m.deal.web.payload.MainBorrowerRequest;
+import com.alkl1m.deal.domain.entity.ContractorOutbox;
+import com.alkl1m.deal.domain.enums.ContractorOutboxStatus;
+import com.alkl1m.deal.repository.ContractorOutboxRepository;
+import com.alkl1m.deal.web.payload.ChangeStatusPayload;
 import org.junit.jupiter.api.Test;
-import org.springframework.amqp.rabbit.core.RabbitAdmin;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.jdbc.Sql;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Testcontainers
 @SpringBootTest
-class MainBorrowerProducerITest {
+class DealServiceImplTest {
 
     @Container
     static RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:3-management")
@@ -41,27 +46,21 @@ class MainBorrowerProducerITest {
     }
 
     @Autowired
-    MainBorrowerProducer mainBorrowerProducer;
+    DealServiceImpl dealService;
 
     @Autowired
-    RabbitTemplate rabbitTemplate;
-
-    @Autowired
-    RabbitAdmin rabbitAdmin;
+    ContractorOutboxRepository outboxRepository;
 
     @Test
-    void testSendMessage_withValidPayload_returnsValidData() throws InterruptedException {
+    @Sql("/sql/contractors.sql")
+    void testChangeStatus_withValidPayload_savesNewOutboxEntity() {
+        ChangeStatusPayload payload = new ChangeStatusPayload(UUID.fromString("139916c4-9caa-402d-a464-0a2e3a74e889"), "ACTIVE");
+        dealService.changeStatus(payload, "1");
 
-        MainBorrowerRequest request = new MainBorrowerRequest("1", true);
-        mainBorrowerProducer.sendMessage(request);
+        Optional<ContractorOutbox> outbox = outboxRepository.findContractorOutboxByContractorId("123456789012");
 
-        Thread.sleep(5000);
-
-        MainBorrowerRequest receivedMessage = (MainBorrowerRequest) rabbitTemplate.receiveAndConvert(MQConfiguration.CONTRACTOR_UPDATE_MAIN_BORROWER_QUEUE);
-
-        assertThat(receivedMessage).isNotNull();
-        assertThat(receivedMessage.contractorId()).isEqualTo("1");
-        assertThat(receivedMessage.main()).isTrue();
+        assertNotNull(outbox.get());
+        assertEquals(outbox.get().getStatus(), ContractorOutboxStatus.DONE);
     }
 
 }

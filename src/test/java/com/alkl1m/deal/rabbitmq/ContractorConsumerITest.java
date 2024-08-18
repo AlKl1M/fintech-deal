@@ -75,7 +75,7 @@ class ContractorConsumerITest {
     @Sql("/sql/contractors.sql")
     void testReceiveMessage_withValidMessage_returnsSavedData() {
         UpdateContractorMessage message = new UpdateContractorMessage("123456789012", "newName", "111111111", ZonedDateTime.now().toString(), "1");
-        rabbitTemplate.convertAndSend(MQConfiguration.DEAL_CONTRACTOR_QUEUE, message);
+        rabbitTemplate.convertAndSend(MQConfiguration.DEALS_CONTRACTOR_NEW_DATA_QUEUE, message);
 
         await().atMost(5, SECONDS).untilAsserted(() -> {
             Optional<Contractor> byContractorId = contractorRepository.findByContractorId(message.id());
@@ -93,7 +93,7 @@ class ContractorConsumerITest {
         Optional<Contractor> byContractorId = contractorRepository.findByContractorId("123456789012");
         ZonedDateTime zonedDateTime = ZonedDateTime.of(2023, 1, 1, 0, 0, 0, 0, ZoneId.of("UTC"));
         UpdateContractorMessage message = new UpdateContractorMessage("123456789012", "newName", "111111111", zonedDateTime.toString(), "1");
-        rabbitTemplate.convertAndSend(MQConfiguration.DEAL_CONTRACTOR_QUEUE, message);
+        rabbitTemplate.convertAndSend(MQConfiguration.DEALS_CONTRACTOR_NEW_DATA_QUEUE, message);
 
         await().atMost(5, SECONDS).untilAsserted(() -> {
             Optional<Contractor> byContractorId2 = contractorRepository.findByContractorId(message.id());
@@ -109,11 +109,11 @@ class ContractorConsumerITest {
         registry.stop();
 
         UpdateContractorMessage message = new UpdateContractorMessage("123456789012", "newName", "111111111", ZonedDateTime.now().toString(), "1");
-        rabbitTemplate.convertAndSend(MQConfiguration.DEAL_CONTRACTOR_QUEUE, message);
+        rabbitTemplate.convertAndSend(MQConfiguration.DEALS_CONTRACTOR_NEW_DATA_QUEUE, message);
 
         await().atMost(5, SECONDS).untilAsserted(() -> {
-            registry.getListenerContainer(MQConfiguration.DEAL_CONTRACTOR_QUEUE).start();
-            assertTrue(registry.getListenerContainer(MQConfiguration.DEAL_CONTRACTOR_QUEUE).isRunning());
+            registry.getListenerContainer(MQConfiguration.DEALS_CONTRACTOR_NEW_DATA_QUEUE).start();
+            assertTrue(registry.getListenerContainer(MQConfiguration.DEALS_CONTRACTOR_NEW_DATA_QUEUE).isRunning());
         });
 
 
@@ -129,14 +129,14 @@ class ContractorConsumerITest {
 
     @Test
     @Sql("/sql/contractors.sql")
-    void testReceiveMessage() throws InterruptedException {
+    void testReceiveMessage_withInvalidData_ThrowsExceptionAndGoesToDLQ() throws InterruptedException {
         UpdateContractorMessage message = new UpdateContractorMessage("123456789012", "newName", "111111111", "WRONG DATE", "1");
 
-        rabbitTemplate.convertAndSend(MQConfiguration.DEAL_CONTRACTOR_QUEUE, message);
+        rabbitTemplate.convertAndSend(MQConfiguration.DEALS_CONTRACTOR_NEW_DATA_QUEUE, message);
 
         Thread.sleep(5000);
 
-        UpdateContractorMessage receivedMessage = (UpdateContractorMessage) rabbitTemplate.receiveAndConvert(MQConfiguration.DEAL_CONTRACTOR_DLQ);
+        UpdateContractorMessage receivedMessage = (UpdateContractorMessage) rabbitTemplate.receiveAndConvert(MQConfiguration.DEALS_CONTRACTOR_DLQ);
 
         assertNotNull(receivedMessage);
         assertEquals(receivedMessage.id(), message.id());
