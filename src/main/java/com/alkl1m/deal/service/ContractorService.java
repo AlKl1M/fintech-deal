@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public interface ContractorService {
 
-    ContractorDto saveOrUpdate(NewContractorPayload payload);
+    ContractorDto saveOrUpdate(NewContractorPayload payload, String userId);
 
     void deleteContractorById(UUID id);
 

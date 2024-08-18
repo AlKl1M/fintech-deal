@@ -37,7 +37,6 @@ public class ContractorServiceImpl implements ContractorService {
     private final ContractorOutboxService outboxService;
     private final EventBusService eventBusService;
     private final ContractorOutboxRepository outboxRepository;
-    private static final String DEFAULT_USER_ID = "1";
 
     /**
      * Метод saveOrUpdate сохраняет или обновляет данные контрактного исполнителя на основе переданных данных.
@@ -47,7 +46,7 @@ public class ContractorServiceImpl implements ContractorService {
      */
     @Override
     @Transactional
-    public ContractorDto saveOrUpdate(NewContractorPayload payload) {
+    public ContractorDto saveOrUpdate(NewContractorPayload payload, String userId) {
         Contractor contractor = new Contractor();
         if (payload.main() && contractorRepository.existsByDealIdAndMainTrue(payload.dealId())) {
             throw new IllegalStateException("You can't create more than one main contractor for each deal");
@@ -55,10 +54,10 @@ public class ContractorServiceImpl implements ContractorService {
         if (payload.id() != null && contractorRepository.existsById(payload.id())) {
             Contractor existingContractor = contractorRepository.findById(payload.id()).orElse(null);
             if (existingContractor != null) {
-                contractor = updateExistingContractor(payload, existingContractor);
+                contractor = updateExistingContractor(payload, existingContractor, userId);
             }
         } else {
-            contractor = createNewContractor(payload);
+            contractor = createNewContractor(payload, userId);
         }
 
         return ContractorDto.from(contractor);
@@ -121,13 +120,13 @@ public class ContractorServiceImpl implements ContractorService {
         contractorRepository.deleteRoleFromContractor(contractorId, roleId);
     }
 
-    private Contractor createNewContractor(NewContractorPayload payload) {
-        Contractor contractor = NewContractorPayload.toContractor(payload, DEFAULT_USER_ID);
+    private Contractor createNewContractor(NewContractorPayload payload, String userId) {
+        Contractor contractor = NewContractorPayload.toContractor(payload, userId);
         contractor.setId(UUID.randomUUID());
         return contractorRepository.save(contractor);
     }
 
-    private Contractor updateExistingContractor(NewContractorPayload payload, Contractor existingContractor) {
+    private Contractor updateExistingContractor(NewContractorPayload payload, Contractor existingContractor, String userId) {
         existingContractor.setId(payload.id());
         existingContractor.setDealId(payload.dealId());
         existingContractor.setContractorId(payload.contractorId());
@@ -135,7 +134,7 @@ public class ContractorServiceImpl implements ContractorService {
         existingContractor.setInn(payload.inn());
         existingContractor.setMain(payload.main());
         existingContractor.setModifyDate(ZonedDateTime.now());
-        existingContractor.setModifyUserId(DEFAULT_USER_ID);
+        existingContractor.setModifyUserId(userId);
         return contractorRepository.save(existingContractor);
     }
 }
