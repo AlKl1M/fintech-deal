@@ -34,8 +34,8 @@ public class ContractorOutboxServiceImpl implements ContractorOutboxService {
      * @param contractorId уникальный идентификатор контрагента.
      */
     @Override
-    public void save(boolean mainBorrower, String contractorId) {
-        outboxRepository.save(createContractorOutbox(mainBorrower, contractorId));
+    public ContractorOutbox save(boolean mainBorrower, String contractorId) {
+        return outboxRepository.save(createContractorOutbox(mainBorrower, contractorId));
     }
 
     /**
@@ -50,11 +50,12 @@ public class ContractorOutboxServiceImpl implements ContractorOutboxService {
                 PageRequest.of(0, limit, Sort.by("createdDate").ascending())
         );
 
-        batch.forEach(contractorOutbox -> {
-            if (eventBusService.publishContractor(contractorOutbox).getStatusCode().is2xxSuccessful()) {
-                contractorOutbox.setStatus(ContractorOutboxStatus.DONE);
-            }
-        });
+        for (ContractorOutbox contractorOutbox : batch) {
+            eventBusService.publishContractor(contractorOutbox);
+            contractorOutbox.setStatus(ContractorOutboxStatus.DONE);
+            outboxRepository.save(contractorOutbox);
+        }
+
     }
 
     private ContractorOutbox createContractorOutbox(boolean isMain, String contractorId) {

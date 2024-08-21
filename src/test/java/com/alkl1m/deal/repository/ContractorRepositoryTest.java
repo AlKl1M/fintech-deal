@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Import;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -78,7 +79,7 @@ class ContractorRepositoryTest {
                 .name("TEST CONTRACTOR")
                 .inn("123456789")
                 .main(true)
-                .createDate(LocalDate.now())
+                .createDate(ZonedDateTime.now())
                 .modifyDate(null)
                 .createUserId("TEST USER")
                 .modifyUserId(null)
